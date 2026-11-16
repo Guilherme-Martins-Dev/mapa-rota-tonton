@@ -13,3 +13,6 @@ __pycache__/
 
 # claude code (local)
 .claude/settings.local.json
+
+# omc
+.omc/
