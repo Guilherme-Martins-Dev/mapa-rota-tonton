@@ -59,6 +59,16 @@ if (!E) throw new Error('Passe args {"etapa": 1..5}')
 const branch = `etapa/${etapa}-${E.slug}`
 const PY = './.venv/Scripts/python.exe'
 
+// Os agentes de .claude/agents/ só são registrados no início da sessão; para funcionar sempre,
+// cada papel roda como general-purpose e lê a própria definição no arquivo.
+const como = (nome, tarefa, opts) =>
+  agent(
+    `Você atua como o agente "${nome}". Leia primeiro .claude/agents/${nome}.md (ignore o frontmatter) e siga essas instruções à risca.
+
+${tarefa}`,
+    { ...opts, agentType: 'general-purpose' },
+  )
+
 const TESTE = {
   type: 'object',
   properties: {
@@ -85,31 +95,34 @@ await agent(
 )
 
 phase('Desenho')
-const desenho = await agent(
+const desenho = await como(
+  'arquiteto-grafos',
   `Etapa ${etapa} - ${E.titulo}.\n\nEscopo:\n${E.escopo}\n\nProduza o desenho e os critérios de aceite.`,
-  { label: 'arquiteto', phase: 'Desenho', agentType: 'arquiteto-grafos' },
+  { label: 'arquiteto', phase: 'Desenho' },
 )
 
 phase('Implementar')
-await agent(
+await como(
+  'implementador',
   `Etapa ${etapa} - ${E.titulo}. Implemente conforme o desenho abaixo (estamos na branch ${branch}).\n\nEscopo:\n${E.escopo}\n\nDesenho:\n${desenho}`,
-  { label: 'implementador', phase: 'Implementar', agentType: 'implementador' },
+  { label: 'implementador', phase: 'Implementar' },
 )
 
-async function testar(rotulo) {
-  return agent(
+const testar = (rotulo) =>
+  como(
+    'testador',
     `Etapa ${etapa} - ${E.titulo}. Escreva (ou atualize) os testes da etapa e rode ${PY} -m pytest -q. ` +
       `Critérios de aceite do desenho:\n${desenho}`,
-    { label: rotulo, phase: 'Testar', agentType: 'testador', schema: TESTE },
+    { label: rotulo, phase: 'Testar', schema: TESTE },
   )
-}
 
 phase('Testar')
 let teste = await testar('testador')
 for (let i = 0; i < 2 && !teste.passou; i++) {
-  await agent(
+  await como(
+    'implementador',
     `Os testes da etapa ${etapa} falharam. Corrija o CÓDIGO em src/tonton/ (não afrouxe os testes sem motivo):\n${teste.resumo}\n${(teste.falhas || []).join('\n')}`,
-    { label: `corrigir-teste-${i + 1}`, phase: 'Testar', agentType: 'implementador' },
+    { label: `corrigir-teste-${i + 1}`, phase: 'Testar' },
   )
   teste = await testar(`testador-${i + 2}`)
 }
@@ -119,23 +132,22 @@ if (!teste.passou) {
 }
 
 phase('Revisar')
-let revisao = await agent(`Revise a etapa ${etapa} - ${E.titulo} na branch ${branch}.`, {
+let revisao = await como('revisor', `Revise a etapa ${etapa} - ${E.titulo} na branch ${branch}.`, {
   label: 'revisor',
   phase: 'Revisar',
-  agentType: 'revisor',
   schema: REVISAO,
 })
 for (let i = 0; i < 2 && !revisao.aprovado; i++) {
-  await agent(
+  await como(
+    'implementador',
     `O revisor reprovou a etapa ${etapa}. Corrija:\n${(revisao.problemas || []).join('\n')}`,
-    { label: `corrigir-revisao-${i + 1}`, phase: 'Revisar', agentType: 'implementador' },
+    { label: `corrigir-revisao-${i + 1}`, phase: 'Revisar' },
   )
   teste = await testar(`testador-rev-${i + 1}`)
   if (!teste.passou) break
-  revisao = await agent(`Revise de novo a etapa ${etapa} na branch ${branch}.`, {
+  revisao = await como('revisor', `Revise de novo a etapa ${etapa} na branch ${branch}.`, {
     label: `revisor-${i + 2}`,
     phase: 'Revisar',
-    agentType: 'revisor',
     schema: REVISAO,
   })
 }
