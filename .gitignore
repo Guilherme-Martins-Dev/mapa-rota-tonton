@@ -1,0 +1,15 @@
+# segredos
+.env
+
+# cache do osmnx / dados de trânsito
+cache/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# claude code (local)
+.claude/settings.local.json
