@@ -12,7 +12,7 @@ Atualize o status aqui no PR que concluir cada etapa. Regras de modelagem: skill
 | 2 | Pesos `t_livre` e `t_atual` com TomTom | feito (PR #3), com pendências abaixo |
 | 3 | Dijkstra à mão, menor tempo | feito (branch etapa/3-guloso-menor-tempo; PR a numerar) |
 | 4 | Menor consumo de combustível | feito (PR a abrir) |
-| 5 | Planejador: menor distância / tempo / consumo, CLI, GeoJSON | a fazer |
+| 5 | Planejador: menor distância / tempo / consumo, CLI, GeoJSON | feito (PR a abrir) |
 | front | Interface gráfica (framework a escolher pelo usuário) | depois do back-end |
 
 ## Requisitos por etapa (do quadro e do analisar.md)
