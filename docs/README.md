@@ -18,5 +18,8 @@
 | [decisoes/004-fonte-alternativa-api-osm.md](decisoes/004-fonte-alternativa-api-osm.md) | Por que e como baixar o grafo pela API do OSM quando o Overpass falha (filtro `drive` reproduzido, limites da API) | existe |
 | [aula/faq-fonte-alternativa.md](aula/faq-fonte-alternativa.md) | Perguntas e respostas sobre a fonte alternativa, na ótica de grafos | existe |
 | [dados/comparacao-fontes-messejana.md](dados/comparacao-fontes-messejana.md) | Overpass x API do OSM em Messejana: contagens, comprimentos, componentes, tempos; scripts `scripts/comparar_fontes.py` e `scripts/fumaca_real.py --fonte api` | existe |
+| [decisoes/005-otimizacao-yen-astar.md](decisoes/005-otimizacao-yen-astar.md) | Por que e como acelerar o Yen (Lawler, A* com heurística haversine): causa medida em Messejana, candidatas aceitas e rejeitadas | existe |
+| [aula/faq-otimizacao.md](aula/faq-otimizacao.md) | Perguntas e respostas sobre A*, admissibilidade, consistência e Lawler, na ótica de grafos | existe |
+| [dados/bench-otimizacao.md](dados/bench-otimizacao.md) | Tempos, contagens e verificação de custos no grafo real de Messejana (trânsito simulado); script `scripts/bench_otimizacao.py` | existe |
 | `decisoes/` (próximas) | Um registro por decisão técnica (contexto, problema, causa, decisão, alternativas, consequências, evidência) | virá |
 | `aula/` (próximos) | Roteiros e FAQs por tema (Dijkstra, pesos, consumo) | virá |
