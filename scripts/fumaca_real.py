@@ -1,12 +1,19 @@
 """Teste de fumaça com dados REAIS (OSM, sem TomTom). NÃO roda no CI.
 
-Uso: ./.venv/Scripts/python.exe scripts/fumaca_real.py
+Uso: ./.venv/Scripts/python.exe scripts/fumaca_real.py [--fonte auto|api]
 Mede download, leitura do .graphml, preparar_grafo e 3 rotas em Messejana; compara o grafo lido com o
-baixado; decompõe o tempo do download (cronômetros nas etapas do osmnx e cProfile).
-Faz 3 downloads (cerca de 75 s cada) e grava tudo em uma pasta temporária apagada no fim.
+baixado; decompõe o tempo do download conforme a fonte que de fato respondeu:
+  overpass: cronômetros nas etapas do osmnx e cProfile (2 downloads extras);
+  api-osm:  cronômetros por etapa de `baixar_via_api_osm` (1 download extra).
+--fonte auto (padrão): `carregar_grafo` tenta o Overpass e cai para a API se ele falhar.
+--fonte api: pula o Overpass (simula a falha dele) e usa direto o fallback; serve para a máquina em que o
+Overpass está fora do ar e para não esperar o timeout.
+Grava tudo em uma pasta temporária apagada no fim.
 """
+import argparse
 import cProfile
 import importlib
+import statistics
 import pstats
 import sys
 import tempfile
@@ -14,14 +21,16 @@ import time
 from collections import Counter
 from pathlib import Path
 
+import networkx as nx
 import osmnx as ox
+import requests
 from shapely.geometry import LineString
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))  # roda sem instalar o pacote
 
 from tonton import planejador  # noqa: E402
 from tonton.config import LUGAR  # noqa: E402
-from tonton.grafo import carregar_grafo  # noqa: E402
+from tonton.grafo import baixar_via_api_osm, carregar_grafo  # noqa: E402
 from tonton.planejador import Criterio  # noqa: E402
 from tonton.ruas import como_lista, eh_tomtom, ponto_medio  # noqa: E402
 
@@ -140,9 +149,61 @@ def baixar_com_perfil():
         print(f"        {tt:7.2f} s próprio  {ct:7.2f} s acumulado  {nc:7d} chamadas  {Path(arq).name}:{nome}")
 
 
+def baixar_api_por_etapa():
+    """Download pela API do OSM com o tempo de cada etapa de `baixar_via_api_osm` (etapas em sequência: somam o total)."""
+    tempos = {}
+    _, total = medir(lambda: baixar_via_api_osm(LUGAR, tempos))
+    print(f"(e) download por etapa, fonte API do OSM (NÃO comparável com os 74,5 s do Overpass): total {total:.2f} s")
+    for nome, v in tempos.items():
+        if nome.startswith("pedidos"):
+            print(f"    {nome}: {v}")
+        else:
+            print(f"    {nome}: {v:.2f} s ({pct(v, total)} do total)")
+    return total, tempos
+
+
+# Números medidos em 2026-11-16 via Overpass (docs/dados/fumaca-real-messejana.md), para comparar com a API.
+REF_OVERPASS = {"vertices": 746, "arestas": 1870, "sem_name": 8.0, "sem_maxspeed": 92.7, "com_geometry": 29.9,
+                "highway": {"residential": 1568, "tertiary": 85, "primary": 64, "unclassified": 48, "secondary": 40,
+                            "trunk": 39, "living_street": 14, "trunk_link": 7, "primary_link": 7}}
+
+
+def descrever_grafo(G, rotulo):
+    """Estatísticas para comparar fontes: tamanho, highway, % de atributos, comprimento, componentes fortes."""
+    arestas = list(G.edges(keys=True, data=True))
+    n = len(arestas)
+    cont = Counter(h for *_, d in arestas for h in como_lista(d.get("highway")))
+    sem_nome = sum(1 for *_, d in arestas if not any(str(x).strip() for x in como_lista(d.get("name"))))
+    sem_max = sum(1 for *_, d in arestas if d.get("maxspeed") in (None, "", []))
+    com_geom = sum(1 for *_, d in arestas if d.get("geometry") is not None)
+    comp = list(nx.strongly_connected_components(G))
+    comp_fracas = nx.number_weakly_connected_components(G)
+    comprimentos = [float(d["length"]) for *_, d in arestas]
+    print(f"[{rotulo}] vértices {G.number_of_nodes()}  arestas {n}  fonte {G.graph.get('fonte')!r}")
+    print(f"    highway: {dict(cont.most_common())}")
+    print(f"    sem name {pct(sem_nome, n)}  sem maxspeed {pct(sem_max, n)}  com geometry {pct(com_geom, n)}")
+    print(f"    length: soma {sum(comprimentos) / 1000:.3f} km  mediana {statistics.median(comprimentos):.2f} m  "
+          f"média {statistics.mean(comprimentos):.2f} m  máx {max(comprimentos):.1f} m")
+    print(f"    componentes fortemente conexas: {len(comp)} (maior: {max(map(len, comp))} vértices); "
+          f"fracamente conexas: {comp_fracas}")
+    print(f"    referência Overpass (2026-11-16): {REF_OVERPASS['vertices']} vértices, {REF_OVERPASS['arestas']} arestas, "
+          f"sem name {REF_OVERPASS['sem_name']}%, sem maxspeed {REF_OVERPASS['sem_maxspeed']}%, "
+          f"com geometry {REF_OVERPASS['com_geometry']}%")
+    dif = {h: (cont.get(h, 0), r) for h, r in REF_OVERPASS["highway"].items() if cont.get(h, 0) != r}
+    dif.update({h: (v, 0) for h, v in cont.items() if h not in REF_OVERPASS["highway"]})
+    print(f"    highway diferente da referência (agora, referência): {dif or 'nenhum'}")
+
+
 def main():
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--fonte", choices=("auto", "api"), default="auto")
+    args = ap.parse_args()
     # O osmnx tem cache HTTP próprio; desligado para o download medido ser de verdade.
     ox.settings.use_cache = False
+    if args.fonte == "api":
+        def overpass_fora(*a, **k):
+            raise requests.exceptions.ConnectTimeout("Overpass pulado por --fonte api (simulação)")
+        ox.graph_from_place = overpass_fora
     with tempfile.TemporaryDirectory(prefix="tonton-fumaca-") as tmp:  # não mexe no cache real; apaga no fim
         executar(Path(tmp))
 
@@ -150,7 +211,8 @@ def main():
 def executar(pasta):
     print(f"lugar: {LUGAR}")
     G_baixado, t_download = medir(lambda: carregar_grafo(LUGAR, usar_cache=False, pasta=pasta))
-    print(f"(a) download sem cache (+ gravação do .graphml): {t_download:.2f} s")
+    fonte = G_baixado.graph.get("fonte")
+    print(f"(a) download sem cache (+ gravação do .graphml), fonte {fonte!r}: {t_download:.2f} s")
     arquivo = next(pasta.glob("*.graphml"))
     print(f"    arquivo: {arquivo.name}, {arquivo.stat().st_size / 1e6:.2f} MB")
 
@@ -160,6 +222,7 @@ def executar(pasta):
     print("baixado x lido do .graphml:")
     comparar_grafos(G_baixado, G)
     checar_listas_como_texto(G)
+    print(f"    fonte gravada no .graphml e lida de volta: {G.graph.get('fonte')!r}")
 
     arestas = list(G.edges(keys=True, data=True))
     print(f"vértices: {G.number_of_nodes()}  arestas: {G.number_of_edges()}")
@@ -200,8 +263,15 @@ def executar(pasta):
     for c in Criterio:
         print(f"    {c.name}: {len(resumos[c].rota.arestas)} arestas")
 
-    baixar_por_etapa()
-    baixar_com_perfil()
+    descrever_grafo(G, "grafo lido")
+    if fonte == "overpass":
+        for medicao in (baixar_por_etapa, baixar_com_perfil):
+            try:
+                medicao()
+            except requests.exceptions.RequestException as erro:  # Overpass é intermitente: não perde o que já saiu
+                print(f"    {medicao.__name__}: NÃO MEDIDO, Overpass falhou ({type(erro).__name__}: {str(erro)[:120]})")
+    else:
+        baixar_api_por_etapa()
 
 
 if __name__ == "__main__":

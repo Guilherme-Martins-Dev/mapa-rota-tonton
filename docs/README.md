@@ -15,5 +15,8 @@
 | [aula/faq-transito-incremental.md](aula/faq-transito-incremental.md) | Perguntas e respostas sobre a atualização incremental, na ótica de grafos | existe |
 | [dados/bench-transito.md](dados/bench-transito.md) | CPU em grafo sintético (não Messejana) e latência real da TomTom (8 consultas); script `scripts/bench_transito.py` | existe |
 | [dados/fumaca-real-messejana.md](dados/fumaca-real-messejana.md) | Medições com dados reais de Messejana | existe |
+| [decisoes/004-fonte-alternativa-api-osm.md](decisoes/004-fonte-alternativa-api-osm.md) | Por que e como baixar o grafo pela API do OSM quando o Overpass falha (filtro `drive` reproduzido, limites da API) | existe |
+| [aula/faq-fonte-alternativa.md](aula/faq-fonte-alternativa.md) | Perguntas e respostas sobre a fonte alternativa, na ótica de grafos | existe |
+| [dados/comparacao-fontes-messejana.md](dados/comparacao-fontes-messejana.md) | Overpass x API do OSM em Messejana: contagens, comprimentos, componentes, tempos; scripts `scripts/comparar_fontes.py` e `scripts/fumaca_real.py --fonte api` | existe |
 | `decisoes/` (próximas) | Um registro por decisão técnica (contexto, problema, causa, decisão, alternativas, consequências, evidência) | virá |
 | `aula/` (próximos) | Roteiros e FAQs por tema (Dijkstra, pesos, consumo) | virá |
