@@ -1,7 +1,7 @@
 # Teste de fumaça com dados reais: Messejana
 
 Medido com `scripts/fumaca_real.py` em 2026-11-16 (osmnx 2.1.2, Overpass público, sem TomTom, sem cache HTTP do osmnx).
-Os tempos e contagens abaixo vêm da PRIMEIRA versão do script. A versão atual acrescenta três medições (seção "Pendente de medição") que NÃO foram rodadas: o Overpass ficou inacessível na revisão.
+Os tempos e contagens das seções "Tempos medidos" a "Rota de teste" vêm da PRIMEIRA versão do script (fonte: Overpass). As medições que ficaram pendentes foram feitas em 2026-11-17 e estão na seção "Medições que estavam pendentes", com a fonte indicada em cada uma.
 Máquina de desenvolvimento comum; os tempos de rede variam de execução para execução.
 
 ## Tempos medidos
@@ -41,7 +41,7 @@ Os `*_link` não entram na TomTom (só trunk, primary, secondary, tertiary).
 | `name` | str 1691, list 30, ausente 149 |
 | `maxspeed` | ausente 1734, str 134, list 2 |
 
-Os tipos acima mostram `list` para `highway`, `name` e `maxspeed` em algumas arestas, o que indica que `ox.load_graphml` restaurou listas. A checagem direta (nenhum valor str começando com `[`) está na seção "Pendente de medição" e ainda não foi executada.
+Os tipos acima mostram `list` para `highway`, `name` e `maxspeed` em algumas arestas, o que indica que `ox.load_graphml` restaurou listas. A checagem direta (nenhum valor str começando com `[`) foi executada em 2026-11-17: 0 ocorrências (seção "Medições que estavam pendentes").
 
 ## Rota de teste
 
@@ -55,16 +55,37 @@ Origem -3,84244, -38,49937 (vértice 2858690121) até -3,81661, -38,48454 (vért
 
 Sem trânsito (`v_atual = v_livre`), consumo e distância escolhem o mesmo caminho nesta rota; o de menor tempo é 0,46 km mais longo e 0,88 min mais rápido.
 
-## Pendente de medição
+## Medições que estavam pendentes (2026-11-17)
 
-Em 2026-11-16, ao rodar a versão atual do script, `overpass-api.de` não respondeu: `ConnectTimeout` do `requests` em 3 execuções seguidas e, depois, 6 tentativas com 1 minuto de intervalo (o `curl` a `/api/status` falhou no handshake TLS, código 000; os espelhos `overpass.kumi.systems` e `overpass.private.coffee` também deram 000, `overpass.openstreetmap.fr` 403 e `maps.mail.ru` 504). Google e Nominatim responderam 200 da mesma máquina, então a internet funcionava. Por isso os itens abaixo estão implementados no script mas SEM resultado:
+Em 2026-11-16 o Overpass não respondeu (`ConnectTimeout` em 3 execuções e em 6 tentativas com 1 minuto de intervalo; `curl` ao `/api/status` com handshake TLS falho, status 000; os espelhos `overpass.kumi.systems` e `overpass.private.coffee` 000, `overpass.openstreetmap.fr` 403, `maps.mail.ru` 504; Google e Nominatim 200). Por isso as quatro medições abaixo ficaram sem resultado. Em 2026-11-17 foram feitas com a fonte alternativa ([decisão 004](../decisoes/004-fonte-alternativa-api-osm.md)) e, nos itens em que o Overpass voltou a responder (intermitente), com ele também. A fonte de cada número vem indicada.
 
-| Medição | O que o script imprime | Resultado |
+| Medição | Resultado | Fonte |
 |---|---|---|
-| Grafo baixado x grafo lido | igualdade de nós e de `edges(keys=True)`; arestas com `length`, `highway`, `name` ou `maxspeed` diferentes (esperado 0), com exemplos | não medido |
-| Lista virada texto | quantos valores str de `highway`/`name`/`maxspeed` começam com `[` (esperado 0) | não medido |
-| Tempo por etapa do download | cronômetros em `geocode_to_gdf`, `_overpass_request`, `_create_graph`, `simplify_graph`, `largest_component`, `add_edge_lengths` | não medido |
-| Rede contra Python no download | cProfile com tempo próprio agrupado (osmnx, rede/E/S, outros) e as 15 funções mais pesadas | não medido |
+| (i) Grafo baixado x grafo lido do `.graphml` | mesmo conjunto de nós (746 e 746), mesmo `edges(keys=True)` (1870 e 1870), 0 arestas com `length`/`highway`/`name`/`maxspeed` diferentes (esperado 0) | API do OSM (`--fonte api`) e também Overpass (`fonte 'overpass'`, execução automática): 0 diferenças nas duas |
+| (ii) Lista virada texto | 0 valores str de `highway`/`name`/`maxspeed` começando com `[` (esperado 0) | API do OSM e Overpass: 0 nas duas |
+| (iii) Tempo por etapa do download | ver tabelas abaixo | API: tabela "fonte API"; Overpass: tabela "fonte Overpass" |
+| (iv) Rede contra Python no download (cProfile) | NÃO MEDIDO: o Overpass falhou com `ConnectTimeout` (`connect timeout=180`) nas duas tentativas (dentro de `fumaca_real.py` e numa chamada isolada de `baixar_com_perfil`) | Overpass |
 
-Para preencher: `./.venv/Scripts/python.exe scripts/fumaca_real.py` (três downloads, cerca de 75 s cada se o Overpass estiver normal) e copiar a saída para esta página.
-Só a checagem da lógica de comparação foi feita, num grafo sintético de 2 vértices e 1 aresta (0 diferenças, 0 valores começando com `[`); isso valida o código do script, não o grafo de Messejana.
+Também com a API do OSM, o que o script já media: `preparar_grafo` sem trânsito 0,00 s; 3 rotas 0,01 s; leitura do `.graphml` 0,13 s (0,11 s com o arquivo do Overpass); arquivo de 0,80 MB; tipos após o ida-e-volta (`length` float 1870/1870; `highway` str 1868 e list 2; `name` str 1691, list 30, ausente 149; `maxspeed` ausente 1734, str 134, list 2; `geometry` sempre LineString) e rota de teste (4,43 km / 7,80 min / 0,35 L; 4,89 km / 6,92 min / 0,35 L; 4,43 km / 7,80 min / 0,35 L) iguais aos de 2026-11-16. O `.graphml` guarda a fonte (`G.graph["fonte"]`, lido de volta como `'api-osm'` ou `'overpass'`).
+
+### Tempo por etapa, fonte Overpass (2026-11-17; os 74,5 s de 2026-11-16 eram desta fonte)
+
+Download total cronometrado nesta execução: 106,02 s (outro, `carregar_grafo`: 95,24 s). Tempos aninhados: `_create_graph` inclui o pedido ao Overpass, porque o osmnx consome o resultado do pedido dentro dele; não somar linhas.
+
+| Função do osmnx | Tempo | % do total |
+|---|---|---|
+| `geocode_to_gdf` (Nominatim) | 1,16 s | 1,1% |
+| `_get_overpass_pause` (status do Overpass) | 0,68 s | 0,6% |
+| `_overpass_request` (rede + servidor) | 104,07 s | 98,2% |
+| `_create_graph` (inclui o pedido) | 104,21 s | 98,3% |
+| `simplify_graph` | 0,19 s | 0,2% |
+| `largest_component` | 0,18 s | 0,2% |
+| `add_edge_lengths` | 0,02 s | 0,0% |
+
+Leitura: com essa decomposição, cerca de 98% do tempo está no pedido ao Overpass; o resto, tudo em Python, soma cerca de 2%. Uma execução apenas, num dia em que o Overpass estava mais lento que em 2026-11-16 (74 s); separar rede de processamento no servidor não é possível com esses cronômetros.
+
+### Tempo por etapa, fonte API do OSM (2026-11-17; NÃO comparável com os 74,5 s do Overpass)
+
+Total 47,23 s (21 pedidos GET: 5 recusados, 16 aceitos): GET do XML 39,90 s (84,5%), filtro `drive` e nós órfãos 5,54 s (11,7%), geocodificar 1,09 s, `graph_from_xml` 0,24 s, recorte pelo buffer 0,21 s, simplificação 0,19 s, recorte pelo polígono 0,07 s. Detalhes e a comparação entre as duas fontes em [comparacao-fontes-messejana.md](comparacao-fontes-messejana.md).
+
+Para repetir: `./.venv/Scripts/python.exe scripts/fumaca_real.py` (usa o Overpass e cai para a API se ele falhar) ou `--fonte api` para pular o Overpass.
