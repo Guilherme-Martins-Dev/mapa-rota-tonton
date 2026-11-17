@@ -94,13 +94,14 @@ def planejar(G, origem, destino, criterio: Criterio | None = None, veiculo: Veic
 
 
 def planejar_alternativas(G, origem, destino, criterio: Criterio, k: int = 3,
-                          max_sobreposicao: float = 0.8) -> list:
+                          max_sobreposicao: float = 0.8, *, otimizar: bool = True) -> list:
     """Até k rotas distintas para um critério: [Resumo] com a ótima em [0] e depois as alternativas.
 
     Os custos otimizados seguem o critério (pesos do Dijkstra), mas os totais do Resumo são
     somados nas arestas escolhidas, como em `planejar`. Exige preparar_grafo antes.
     """
-    rotas = rotas_alternativas(G, origem, destino, k=k, peso=criterio.value, max_sobreposicao=max_sobreposicao)
+    rotas = rotas_alternativas(G, origem, destino, k=k, peso=criterio.value, max_sobreposicao=max_sobreposicao,
+                                otimizar=otimizar)
     return [_resumir(G, criterio, r) for r in rotas]
 
 

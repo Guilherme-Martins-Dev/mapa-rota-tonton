@@ -15,6 +15,7 @@ Atualize o status aqui no PR que concluir cada etapa. Regras de modelagem: skill
 | 5 | Planejador: menor distância / tempo / consumo, CLI, GeoJSON | feito (PR #8) |
 | extra | Cache do grafo em disco (.graphml) e documentação inicial | feito (PR #9) |
 | extra | Rotas alternativas (k melhores, Yen + filtro de sobreposição): `--alternativas K` | feito (PR a abrir) |
+| extra | Otimização do Yen (Lawler + A* com heurística haversine), `otimizar=` em `menores_rotas` | em andamento (PR a abrir) |
 | front | Interface gráfica (framework a escolher pelo usuário) | depois do back-end |
 
 ## Requisitos por etapa (do quadro e do analisar.md)
