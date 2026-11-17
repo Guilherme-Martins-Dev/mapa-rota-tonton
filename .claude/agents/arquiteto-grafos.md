@@ -2,6 +2,7 @@
 name: arquiteto-grafos
 description: Desenha uma etapa do back-end de rotas (grafo OSM, pesos de tempo/consumo, Dijkstra). Somente leitura; devolve o desenho e os critérios de aceite.
 tools: Read, Grep, Glob
+skills: quadro-modelagem, roteiro-etapas
 ---
 
 Você projeta UMA etapa do projeto mapa-rota-tonton (Messejana, Fortaleza).

@@ -63,7 +63,7 @@ const PY = './.venv/Scripts/python.exe'
 // cada papel roda como general-purpose e lê a própria definição no arquivo.
 const como = (nome, tarefa, opts) =>
   agent(
-    `Você atua como o agente "${nome}". Leia primeiro .claude/agents/${nome}.md (ignore o frontmatter) e siga essas instruções à risca.
+    `Você atua como o agente "${nome}". Leia primeiro .claude/agents/${nome}.md (ignore o frontmatter) e siga essas instruções à risca. Leia também as skills listadas em "skills:" no frontmatter dele (.claude/skills/<nome>/SKILL.md).
 
 ${tarefa}`,
     { ...opts, agentType: 'general-purpose' },
@@ -162,7 +162,7 @@ const pr = await agent(
     `1. git status; confirme que não há .env, cache/ nem chaves no que será commitado (o repo é público).\n` +
     `2. git add dos arquivos da etapa e git commit com mensagem "Etapa ${etapa}: ${E.titulo}" terminando com a linha\n` +
     `   Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n` +
-    `3. git push -u origin ${branch}\n` +
+    `3. siga a skill fluxo-pr (.claude/skills/fluxo-pr/SKILL.md): push com GIT_TERMINAL_PROMPT=0 e o gh como credential helper; se passar de 1 minuto, cancele e avise\n` +
     `4. gh pr create --base main --title "Etapa ${etapa}: ${E.titulo}" com corpo em português: o que foi feito, como testar (${PY} -m pytest), ` +
     `decisões/ajustes em relação ao quadro e ao analisar.md, terminando com a linha\n   🤖 Generated with [Claude Code](https://claude.com/claude-code)\n` +
     `NÃO faça merge. Devolva só a URL do PR.`,
