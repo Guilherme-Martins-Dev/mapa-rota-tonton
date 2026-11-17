@@ -23,6 +23,8 @@ Atualize o status aqui no PR que concluir cada etapa. Regras de modelagem: skill
 - **5:** sistema que escolhe entre (1) menor distância, (2) menor tempo, (3) menor consumo; saída GeoJSON para o futuro front.
 
 ## Pendências conhecidas
-- Etapa 2: falta cache em disco com validade (hoje o cache é só em memória) e fallback pelo `maxspeed`/padrão por tipo de via quando a TomTom falha (hoje `v_atual = v_livre`).
+- Etapa 2: o cache em disco com validade está no PR #5 (`transito.com_cache`). O fallback por `maxspeed`/padrão por tipo de via já existe em `pesos.velocidade_livre_osm` (sem TomTom, `v_atual = v_livre`).
+- Cada PR de etapa deve atualizar a tabela de status acima.
+- Ordem de merge: #4 (skills) → #5 (cache) → etapa 3 → etapa 4 → etapa 5. As etapas 3, 4 e 5 dependem da anterior mergeada.
 - Itens ilegíveis do quadro (ver `quadro-modelagem`): confirmar com o usuário se importam.
 - Escolha do framework do front: decisão do usuário.
