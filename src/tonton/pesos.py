@@ -58,6 +58,15 @@ def _velocidades_tomtom(fluxo: dict) -> tuple[float, float] | None:
     return (livre, atual) if livre > 0 and atual > 0 else None
 
 
+def gravar_velocidades(dados: dict, v_livre: float, v_atual: float) -> None:
+    """Grava na aresta v_livre, v_atual (km/h), t_livre e t_atual (s)."""
+    comp = dados.get("length")
+    dados.update(
+        v_livre=v_livre, v_atual=v_atual,
+        t_livre=tempo(comp, v_livre), t_atual=tempo(comp, v_atual),
+    )
+
+
 def atribuir_pesos(G, consultar: Callable[[float, float], dict] | None = None):
     """Grava em cada aresta v_livre, v_atual (km/h), t_livre e t_atual (s).
 
@@ -76,9 +85,5 @@ def atribuir_pesos(G, consultar: Callable[[float, float], dict] | None = None):
                     cache[ponto] = None
             if cache[ponto] is not None:
                 v_livre, v_atual = cache[ponto]
-        comp = dados.get("length")
-        dados.update(
-            v_livre=v_livre, v_atual=v_atual,
-            t_livre=tempo(comp, v_livre), t_atual=tempo(comp, v_atual),
-        )
+        gravar_velocidades(dados, v_livre, v_atual)
     return G
