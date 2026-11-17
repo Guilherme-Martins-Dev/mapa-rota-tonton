@@ -11,7 +11,9 @@ from tonton.planejador import (
     Resumo,
     comparar,
     geojson,
+    geojson_colecao,
     planejar,
+    planejar_alternativas,
     preparar_grafo,
     resolver_ponto,
     vertice_mais_proximo,
@@ -337,3 +339,85 @@ def test_geojson_origem_igual_destino_repete_o_ponto():
     f = geojson(G, planejar(G, "s", "s", Criterio.DISTANCIA)[Criterio.DISTANCIA])
     assert f["geometry"]["coordinates"] == [[-38.5, -3.8], [-38.5, -3.8]]
     assert f["properties"]["distancia_km"] == 0
+
+
+# ---------- alternativas ----------
+
+def test_planejar_alternativas_ordem_e_totais_sobre_as_arestas():
+    G = _grafo_tres_vias()
+    rs = planejar_alternativas(G, "s", "t", Criterio.DISTANCIA, k=3, max_sobreposicao=1.0)
+    assert [r.rota.vertices for r in rs] == [["s", "d", "t"], ["s", "e", "t"], ["s", "f", "t"]]
+    for r in rs:
+        assert isinstance(r, Resumo) and r.criterio is Criterio.DISTANCIA
+        assert r.distancia_km == pytest.approx(_soma(G, r, "length") / 1000)
+        assert r.tempo_min == pytest.approx(_soma(G, r, "t_atual") / 60)
+        assert r.litros == pytest.approx(_soma(G, r, "litros"))
+    assert [r.distancia_km for r in rs] == pytest.approx([3.0, 4.0, 5.0])
+    # a ótima coincide com planejar
+    assert rs[0].rota.vertices == planejar(G, "s", "t", Criterio.DISTANCIA)[Criterio.DISTANCIA].rota.vertices
+
+
+def test_planejar_alternativas_k_um_e_k_maior_que_caminhos():
+    G = _grafo_tres_vias()
+    assert len(planejar_alternativas(G, "s", "t", Criterio.TEMPO, k=1)) == 1
+    assert len(planejar_alternativas(G, "s", "t", Criterio.TEMPO, k=10, max_sobreposicao=1.0)) == 3
+
+
+def test_planejar_alternativas_criterios_diferentes_ordenam_diferente():
+    G = _grafo_tres_vias()
+    assert planejar_alternativas(G, "s", "t", Criterio.TEMPO, k=1)[0].rota.vertices == ["s", "f", "t"]
+    assert planejar_alternativas(G, "s", "t", Criterio.CONSUMO, k=1)[0].rota.vertices == ["s", "e", "t"]
+
+
+def test_planejar_alternativas_peso_nao_finito_no_total():
+    G = _grafo_tres_vias()
+    G["s"]["d"][0]["t_atual"] = float("nan")  # aresta da rota ótima por distância
+    with pytest.raises(ValueError):
+        planejar_alternativas(G, "s", "t", Criterio.DISTANCIA, k=2)
+
+
+def test_planejar_alternativas_inalcancavel_e_k_invalido():
+    G = _grafo_tres_vias()
+    G.add_node("ilha", x=-38.4, y=-3.8)
+    with pytest.raises(RotaInexistente):
+        planejar_alternativas(G, "s", "ilha", Criterio.TEMPO, k=3)
+    with pytest.raises(ValueError):
+        planejar_alternativas(G, "s", "t", Criterio.TEMPO, k=0)
+    with pytest.raises(ValueError):
+        planejar_alternativas(G, "s", "t", Criterio.TEMPO, k=2, max_sobreposicao=1.5)
+
+
+def test_geojson_colecao_indice_e_criterio():
+    G = _grafo_tres_vias()
+    rs = planejar_alternativas(G, "s", "t", Criterio.CONSUMO, k=3, max_sobreposicao=1.0)
+    col = geojson_colecao(G, rs)
+    assert col["type"] == "FeatureCollection" and len(col["features"]) == 3
+    assert [f["properties"]["indice"] for f in col["features"]] == [0, 1, 2]
+    for f, r in zip(col["features"], rs):
+        assert f["properties"]["criterio"] == "consumo"
+        assert f["properties"]["litros"] == r.litros
+        assert f["geometry"]["type"] == "LineString"
+    assert col["features"][0]["geometry"] == geojson(G, rs[0])["geometry"]
+    assert geojson_colecao(G, []) == {"type": "FeatureCollection", "features": []}
+
+
+def test_comparar_lista_de_alternativas():
+    G = _grafo_tres_vias()
+    rs = planejar_alternativas(G, "s", "t", Criterio.DISTANCIA, k=3, max_sobreposicao=1.0)
+    texto = comparar(rs)
+    linhas = texto.splitlines()
+    assert len(linhas) == 1 + 3 + 1
+    assert linhas[0].startswith("rota")
+    assert linhas[1].startswith("ótima") and linhas[2].startswith("alt 1") and linhas[3].startswith("alt 2")
+    assert "menor distância" not in texto
+    assert "*" in linhas[1]  # a ótima por distância é a menor em km
+    assert comparar([]) == ""
+
+
+def test_comparar_dict_uso_antigo():
+    G = _grafo_tres_vias()
+    texto = comparar(planejar(G, "s", "t"))
+    for rotulo in ("menor distância", "menor tempo", "menor consumo"):
+        assert rotulo in texto
+    assert texto.splitlines()[0].startswith("critério")
+    assert comparar({}) == ""

@@ -10,9 +10,11 @@ Atualize o status aqui no PR que concluir cada etapa. Regras de modelagem: skill
 | 0 | Estrutura `src/tonton`, git, CI, agentes, workflow | feito (PR #1) |
 | 1 | Identificar ruas: trecho, ponto médio, cruzamento seguinte, filtro de tipos, busca por nome | feito (PR #2) |
 | 2 | Pesos `t_livre` e `t_atual` com TomTom | feito (PR #3), com pendências abaixo |
-| 3 | Dijkstra à mão, menor tempo | feito (branch etapa/3-guloso-menor-tempo; PR a numerar) |
-| 4 | Menor consumo de combustível | feito (PR a abrir) |
-| 5 | Planejador: menor distância / tempo / consumo, CLI, GeoJSON | feito (PR a abrir) |
+| 3 | Dijkstra à mão, menor tempo | feito (PR #6) |
+| 4 | Menor consumo de combustível | feito (PR #7) |
+| 5 | Planejador: menor distância / tempo / consumo, CLI, GeoJSON | feito (PR #8) |
+| extra | Cache do grafo em disco (.graphml) e documentação inicial | feito (PR #9) |
+| extra | Rotas alternativas (k melhores, Yen + filtro de sobreposição): `--alternativas K` | feito (PR a abrir) |
 | front | Interface gráfica (framework a escolher pelo usuário) | depois do back-end |
 
 ## Requisitos por etapa (do quadro e do analisar.md)
