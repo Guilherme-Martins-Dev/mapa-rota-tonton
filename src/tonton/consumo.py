@@ -42,13 +42,18 @@ def litros(comprimento_m: float | None, v_kmh: float | None, veiculo: Veiculo = 
     return (comprimento_m / 1000) * consumo_l_por_100km(v_kmh, veiculo) / 100
 
 
+def gravar_litros(dados: dict, veiculo: Veiculo = PADRAO) -> None:
+    """Grava `litros` na aresta, a partir de v_atual (sem ele: velocidade livre do OSM)."""
+    v = dados.get("v_atual")
+    if v is None:
+        v = velocidade_livre_osm(dados)
+    dados["litros"] = litros(dados.get("length"), v, veiculo)
+
+
 def atribuir_consumo(G, veiculo: Veiculo = PADRAO):
     """Grava `litros` em cada aresta, a partir de v_atual (sem ele: velocidade livre do OSM)."""
     for _, _, dados in G.edges(data=True):
-        v = dados.get("v_atual")
-        if v is None:
-            v = velocidade_livre_osm(dados)
-        dados["litros"] = litros(dados.get("length"), v, veiculo)
+        gravar_litros(dados, veiculo)
     return G
 
 

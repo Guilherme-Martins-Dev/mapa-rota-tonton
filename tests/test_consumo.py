@@ -150,3 +150,21 @@ def test_rota_menor_consumo_respeita_mao_unica_e_inalcancavel():
     assert rota_menor_consumo(G, "s", "t").vertices == ["s", "t"]
     with pytest.raises(RotaInexistente):
         rota_menor_consumo(G, "t", "s")
+
+
+def test_gravar_litros_igual_a_formula_e_a_atribuir_consumo():
+    from tonton.consumo import gravar_litros
+
+    G = nx.MultiDiGraph()
+    G.add_edge(1, 2, length=3000.0, v_atual=40.0, highway="primary")
+    G.add_edge(2, 3, length=1000.0, highway="primary")  # sem v_atual: velocidade livre do OSM (50)
+    G.add_edge(3, 4, highway="primary", v_atual=40.0)    # sem length: inf
+    isolada = {k: dict(G.edges[k]) for k in G.edges}
+    for d in isolada.values():
+        gravar_litros(d)
+    atribuir_consumo(G)
+    for k, d in isolada.items():
+        assert d["litros"] == G.edges[k]["litros"]
+    assert isolada[(1, 2, 0)]["litros"] == pytest.approx(3 * consumo_l_por_100km(40.0) / 100)
+    assert isolada[(2, 3, 0)]["litros"] == pytest.approx(consumo_l_por_100km(50.0) / 100)
+    assert isolada[(3, 4, 0)]["litros"] == math.inf

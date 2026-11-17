@@ -11,6 +11,9 @@
 | [decisoes/002-rotas-alternativas.md](decisoes/002-rotas-alternativas.md) | Por que e como calcular as k melhores rotas (Yen) com filtro de sobreposição | existe |
 | [aula/faq-rotas-alternativas.md](aula/faq-rotas-alternativas.md) | Perguntas e respostas sobre rotas alternativas, na ótica de grafos | existe |
 | [dados/bench-alternativas.md](dados/bench-alternativas.md) | Benchmark em grafo sintético (grade), não Messejana; script `scripts/bench_alternativas.py` | existe |
+| [decisoes/003-transito-incremental.md](decisoes/003-transito-incremental.md) | Por que e como atualizar o trânsito consultando menos e recalculando só o que mudou | existe |
+| [aula/faq-transito-incremental.md](aula/faq-transito-incremental.md) | Perguntas e respostas sobre a atualização incremental, na ótica de grafos | existe |
+| [dados/bench-transito.md](dados/bench-transito.md) | CPU em grafo sintético (não Messejana) e latência real da TomTom (8 consultas); script `scripts/bench_transito.py` | existe |
 | [dados/fumaca-real-messejana.md](dados/fumaca-real-messejana.md) | Medições com dados reais de Messejana | existe |
 | `decisoes/` (próximas) | Um registro por decisão técnica (contexto, problema, causa, decisão, alternativas, consequências, evidência) | virá |
 | `aula/` (próximos) | Roteiros e FAQs por tema (Dijkstra, pesos, consumo) | virá |

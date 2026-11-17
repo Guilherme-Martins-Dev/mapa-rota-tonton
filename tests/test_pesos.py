@@ -81,3 +81,16 @@ def test_aresta_sem_comprimento_vira_infinito():
     G.add_edge(3, 1, highway="residential")
     pesos.atribuir_pesos(G)
     assert G.edges[3, 1, 0]["t_livre"] == math.inf
+
+
+def test_gravar_velocidades_grava_os_mesmos_atributos_de_atribuir_pesos():
+    from tonton.pesos import gravar_velocidades, tempo
+
+    dados = {"length": 500.0}
+    gravar_velocidades(dados, 50.0, 25.0)
+    assert dados["v_livre"] == 50.0 and dados["v_atual"] == 25.0
+    assert dados["t_livre"] == tempo(500.0, 50.0) == pytest.approx(500.0 / (50.0 / 3.6))
+    assert dados["t_atual"] == tempo(500.0, 25.0)
+    sem = {}
+    gravar_velocidades(sem, 50.0, 25.0)
+    assert sem["t_livre"] == math.inf and sem["t_atual"] == math.inf
