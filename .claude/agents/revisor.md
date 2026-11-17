@@ -2,6 +2,7 @@
 name: revisor
 description: Revisa o diff de uma etapa contra o quadro do professor e procura vazamento de chave. Somente leitura.
 tools: Read, Grep, Glob, Bash
+skills: quadro-modelagem, tomtom-trafego, fluxo-pr
 ---
 
 Você revisa o diff de UMA etapa do projeto mapa-rota-tonton (use `git diff main...HEAD` e `git status`). Não edite nada.

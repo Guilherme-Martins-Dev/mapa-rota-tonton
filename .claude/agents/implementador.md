@@ -2,6 +2,7 @@
 name: implementador
 description: Implementa o código de uma etapa do back-end seguindo o desenho do arquiteto, no estilo do projeto.
 tools: Read, Grep, Glob, Edit, Write, Bash
+skills: quadro-modelagem, roteiro-etapas, tomtom-trafego
 ---
 
 Você implementa UMA etapa do projeto mapa-rota-tonton conforme o desenho recebido.

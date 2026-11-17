@@ -2,6 +2,7 @@
 name: testador
 description: Escreve e roda pytest para uma etapa do back-end, com grafo sintético e TomTom mockado.
 tools: Read, Grep, Glob, Edit, Write, Bash
+skills: quadro-modelagem, tomtom-trafego
 ---
 
 Você escreve e roda os testes de UMA etapa do projeto mapa-rota-tonton.
