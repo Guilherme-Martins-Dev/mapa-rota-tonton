@@ -47,12 +47,14 @@ def _norm(argv):
 class Fakes:
     def __init__(self):
         self.carregados = 0
+        self.kwargs_carregar = []
         self.fabricas = 0
         self.consultas = []
         self.exibido = None
 
-    def carregar(self):
+    def carregar(self, **kwargs):
         self.carregados += 1
+        self.kwargs_carregar.append(kwargs)
         return _grafo()
 
     def factory(self):
@@ -214,6 +216,16 @@ def test_main_module_importa_cli_main():
 
     spec = importlib.util.find_spec("tonton.__main__")
     assert spec is not None
+
+
+def test_atualizar_grafo_chama_carregar_sem_cache(fk):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--atualizar-grafo") == 0
+    assert fk.kwargs_carregar == [{"usar_cache": False}]
+
+
+def test_sem_atualizar_grafo_chama_carregar_sem_argumentos(fk):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito") == 0
+    assert fk.kwargs_carregar == [{}]
 
 
 def test_origem_com_espaco_e_lat_negativa_aceita(fk):
