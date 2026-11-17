@@ -4,7 +4,8 @@ import networkx as nx
 import pytest
 
 from tonton import cli
-from tonton.planejador import Criterio
+from tonton.planejador import Criterio, Resumo
+from tonton.rotas import RotaInexistente
 
 
 def _grafo():
@@ -231,3 +232,98 @@ def test_sem_atualizar_grafo_chama_carregar_sem_argumentos(fk):
 def test_origem_com_espaco_e_lat_negativa_aceita(fk):
     assert cli.main(["--origem", S, "--destino", T, "--sem-transito"],
                     carregar=fk.carregar, exibir=fk.exibir) == 0
+
+
+# ---------- --alternativas / --max-sobreposicao ----------
+
+def test_alternativas_uma_tabela_por_criterio(fk, capsys):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "3") == 0
+    out = capsys.readouterr().out
+    for c in ("distancia", "tempo", "consumo"):
+        assert f"[{c}] 3 rota(s)" in out
+    assert out.count("ótima") == 3 and out.count("alt 1") == 3 and out.count("alt 2") == 3
+    assert "alt 3" not in out
+
+
+def test_alternativas_com_criterio_unico(fk, capsys):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "2",
+                    "--criterio", "tempo") == 0
+    out = capsys.readouterr().out
+    assert "[tempo] 2 rota(s)" in out and "[distancia]" not in out and "[consumo]" not in out
+
+
+def test_alternativas_geojson_colecao_com_indices(fk, tmp_path):
+    arq = tmp_path / "alt.geojson"
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "3",
+                    "--geojson", str(arq)) == 0
+    dados = json.loads(arq.read_text(encoding="utf-8"))
+    assert dados["type"] == "FeatureCollection" and len(dados["features"]) == 9
+    props = [f["properties"] for f in dados["features"]]
+    assert [p["criterio"] for p in props] == ["distancia"] * 3 + ["tempo"] * 3 + ["consumo"] * 3
+    assert [p["indice"] for p in props] == [0, 1, 2] * 3
+    for f in dados["features"]:
+        assert f["geometry"]["type"] == "LineString"
+
+
+def test_k_um_mantem_comportamento_antigo(fk, tmp_path, capsys):
+    arq = tmp_path / "um.geojson"
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "1",
+                    "--mostrar", "--geojson", str(arq)) == 0
+    out = capsys.readouterr().out
+    assert "menor distância" in out and "rota(s)" not in out
+    _, resumos = fk.exibido
+    assert set(resumos) == set(Criterio)
+    assert all(isinstance(r, Resumo) for r in resumos.values())
+    props = [f["properties"] for f in json.loads(arq.read_text(encoding="utf-8"))["features"]]
+    assert all("indice" not in p for p in props)
+
+
+def test_default_e_k_um(fk):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--mostrar") == 0
+    assert all(isinstance(r, Resumo) for r in fk.exibido[1].values())
+
+
+def test_k_maior_que_um_exibir_recebe_listas(fk):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "3", "--mostrar") == 0
+    _, resumos = fk.exibido
+    assert set(resumos) == set(Criterio)
+    for c, lista in resumos.items():
+        assert isinstance(lista, list) and len(lista) == 3
+        assert all(isinstance(r, Resumo) and r.criterio is c for r in lista)
+
+
+@pytest.mark.parametrize("opcao", [["--alternativas", "0"], ["--alternativas", "-2"],
+                                   ["--max-sobreposicao", "1.5"], ["--max-sobreposicao=-0.1"]])
+def test_erros_de_uso_devolvem_2(fk, capsys, opcao):
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", *opcao) == 2
+    err = capsys.readouterr().err
+    assert "erro" in err
+    assert fk.carregados == 0 and fk.exibido is None
+
+
+def test_max_sobreposicao_e_repassado(fk, monkeypatch):
+    chamadas = []
+
+    def espiao(G, o, d, criterio, k, max_sobreposicao):
+        chamadas.append((criterio, k, max_sobreposicao))
+        return []
+
+    monkeypatch.setattr(cli.planejador, "planejar_alternativas", espiao)
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "4",
+                    "--max-sobreposicao", "0.3", "--criterio", "tempo") == 0
+    assert chamadas == [(Criterio.TEMPO, 4, 0.3)]
+
+
+def test_max_sobreposicao_nos_limites_aceitos(fk):
+    for v in ("0", "1", "0.5"):
+        assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "2",
+                        "--max-sobreposicao", v) == 0
+
+
+def test_alternativas_rota_inexistente_devolve_2(fk, monkeypatch, capsys):
+    def falha(*a, **kw):
+        raise RotaInexistente("sem caminho")
+
+    monkeypatch.setattr(cli.planejador, "planejar_alternativas", falha)
+    assert fk.rodar("--origem", S, "--destino", T, "--sem-transito", "--alternativas", "3") == 2
+    assert "sem caminho" in capsys.readouterr().err

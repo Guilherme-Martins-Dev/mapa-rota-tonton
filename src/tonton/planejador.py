@@ -10,7 +10,7 @@ from enum import Enum
 
 from tonton import consumo, pesos
 from tonton.consumo import PADRAO, Veiculo
-from tonton.rotas import Rota, menor_rota
+from tonton.rotas import Rota, menor_rota, rotas_alternativas
 from tonton.ruas import buscar_rua
 
 
@@ -93,24 +93,45 @@ def planejar(G, origem, destino, criterio: Criterio | None = None, veiculo: Veic
     return {c: _resumir(G, c, menor_rota(G, origem, destino, peso=c.value)) for c in criterios}
 
 
+def planejar_alternativas(G, origem, destino, criterio: Criterio, k: int = 3,
+                          max_sobreposicao: float = 0.8) -> list:
+    """Até k rotas distintas para um critério: [Resumo] com a ótima em [0] e depois as alternativas.
+
+    Os custos otimizados seguem o critério (pesos do Dijkstra), mas os totais do Resumo são
+    somados nas arestas escolhidas, como em `planejar`. Exige preparar_grafo antes.
+    """
+    rotas = rotas_alternativas(G, origem, destino, k=k, peso=criterio.value, max_sobreposicao=max_sobreposicao)
+    return [_resumir(G, criterio, r) for r in rotas]
+
+
 _ROTULO = {Criterio.DISTANCIA: "menor distância", Criterio.TEMPO: "menor tempo", Criterio.CONSUMO: "menor consumo"}
 
 
-def comparar(resumos: dict) -> str:
-    """Tabela em texto, uma linha por critério; '*' marca o melhor de cada coluna."""
+def comparar(resumos) -> str:
+    """Tabela em texto; '*' marca o melhor de cada coluna.
+
+    `resumos` é um dict {Criterio: Resumo} (uma linha por critério) ou uma lista de Resumo
+    (alternativas de um critério: linhas "ótima", "alt 1", "alt 2"...).
+    """
     if not resumos:
         return ""
+    if isinstance(resumos, dict):
+        linhas_resumo = [(_ROTULO[c], r) for c, r in resumos.items()]
+        cabecalho = "critério"
+    else:
+        linhas_resumo = [("ótima" if i == 0 else f"alt {i}", r) for i, r in enumerate(resumos)]
+        cabecalho = "rota"
     campos = ("distancia_km", "tempo_min", "litros")
-    melhor = {c: min(getattr(r, c) for r in resumos.values()) for c in campos}
+    melhor = {c: min(getattr(r, c) for _, r in linhas_resumo) for c in campos}
 
     def celula(r, campo, unidade):
         v = getattr(r, campo)
         return f"{v:8.2f} {unidade}{'*' if v == melhor[campo] else ' '}"
 
-    linhas = [f"{'critério':<16}{'distância':>12}  {'tempo':>12}  {'consumo':>12}"]
-    for c, r in resumos.items():
+    linhas = [f"{cabecalho:<16}{'distância':>12}  {'tempo':>12}  {'consumo':>12}"]
+    for rotulo, r in linhas_resumo:
         linhas.append(
-            f"{_ROTULO[c]:<16}{celula(r, 'distancia_km', 'km')}  "
+            f"{rotulo:<16}{celula(r, 'distancia_km', 'km')}  "
             f"{celula(r, 'tempo_min', 'min')}  {celula(r, 'litros', 'L')}"
         )
     linhas.append("* = melhor da coluna")
@@ -151,3 +172,13 @@ def geojson(G, resumo: Resumo) -> dict:
             "litros": resumo.litros,
         },
     }
+
+
+def geojson_colecao(G, resumos) -> dict:
+    """FeatureCollection com uma Feature por Resumo; properties ganham `indice` (0 = ótima)."""
+    features = []
+    for i, r in enumerate(resumos):
+        f = geojson(G, r)
+        f["properties"]["indice"] = i
+        features.append(f)
+    return {"type": "FeatureCollection", "features": features}
