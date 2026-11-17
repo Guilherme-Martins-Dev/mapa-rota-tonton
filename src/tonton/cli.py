@@ -1,4 +1,4 @@
-"""CLI: python -m tonton --origem "..." --destino "..." [--criterio ...] [--geojson arq] [--mostrar]."""
+"""CLI: python -m tonton --origem "..." --destino "..." [--criterio ...] [--geojson arq] [--mostrar] [--atualizar-grafo]."""
 import argparse
 import json
 import sys
@@ -25,6 +25,7 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--criterio", choices=[*CRITERIOS, "todos"], default="todos")
     p.add_argument("--geojson", metavar="ARQUIVO", help="grava as rotas em GeoJSON")
     p.add_argument("--mostrar", action="store_true", help="desenha as rotas no mapa")
+    p.add_argument("--atualizar-grafo", action="store_true", help="baixa o grafo do OSM de novo e regrava o cache")
     p.add_argument("--sem-transito", action="store_true", help="não consulta a TomTom")
     return p
 
@@ -63,7 +64,7 @@ def main(argv=None, carregar=carregar_grafo, consultar_factory=consultar_padrao,
         print(f"erro: {e}\nDefina TOMTOM_KEY ou use --sem-transito.", file=sys.stderr)
         return 2
     try:
-        G = planejador.preparar_grafo(carregar(), consultar)
+        G = planejador.preparar_grafo(carregar(usar_cache=False) if args.atualizar_grafo else carregar(), consultar)
         origem = planejador.resolver_ponto(G, args.origem)
         destino = planejador.resolver_ponto(G, args.destino)
         criterio = None if args.criterio == "todos" else CRITERIOS[args.criterio]
