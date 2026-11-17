@@ -18,6 +18,18 @@ copy .env.example .env   # preencha TOMTOM_KEY
 .\.venv\Scripts\python.exe -m pytest
 ```
 
+## Usando a CLI
+
+```powershell
+.\.venv\Scripts\python.exe -m tonton --origem "-3.8267,-38.4935" --destino "Avenida Dedé Brasil" --criterio todos --geojson rotas.geojson --mostrar
+```
+
+- `--origem` / `--destino`: `"lat,lon"` ou nome de rua.
+- `--criterio distancia|tempo|consumo|todos` (padrão `todos`): imprime km, min e litros de cada rota, com `*` no melhor de cada coluna.
+- `--geojson ARQUIVO`: grava as rotas (FeatureCollection de LineString `[lon, lat]`).
+- `--mostrar`: desenha as rotas no mapa.
+- `--sem-transito`: não usa a TomTom (velocidades do OSM). Sem isso é preciso `TOMTOM_KEY` no ambiente ou no `.env`.
+
 ## Etapas (um PR por etapa)
 
 | Etapa | Conteúdo |
@@ -27,6 +39,6 @@ copy .env.example .env   # preencha TOMTOM_KEY
 | 2 | pesos de tempo (`t_livre`, `t_atual`) com TomTom |
 | 3 | Dijkstra: menor tempo |
 | 4 | menor consumo de combustível |
-| 5 | planejador: escolhe distância / tempo / consumo |
+| 5 | planejador: escolhe distância / tempo / consumo (CLI e GeoJSON) |
 
 A interface gráfica vem depois do back-end.
