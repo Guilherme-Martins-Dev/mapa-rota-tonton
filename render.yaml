@@ -1,0 +1,14 @@
+# Back-end (FastAPI) no Render: https://render.com > New > Blueprint > este repositório.
+services:
+  - type: web
+    name: rotas-messejana-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn tonton.api:app --app-dir src --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/veiculos
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GRAFO_VALIDADE_DIAS
+        value: "3650"

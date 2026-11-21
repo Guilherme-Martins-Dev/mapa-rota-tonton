@@ -2,7 +2,9 @@
 .env
 
 # cache do osmnx / dados de trânsito
-cache/
+cache/*
+# o grafo de Messejana (~800 KB) vai no repositório: a hospedagem do back-end não precisa baixar do Overpass
+!cache/grafo-*.graphml
 
 # python
 .venv/
