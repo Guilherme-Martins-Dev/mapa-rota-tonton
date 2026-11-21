@@ -23,9 +23,10 @@ function tempos(f: RotaFeature): number[] {
   return f.geometry.coordinates.map((_, i) => i / Math.max(n - 1, 1))
 }
 
-export function Mapa({ rotas, criterio }: { rotas: Rotas | null; criterio: Criterio }) {
+export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | null; criterio: Criterio; interativo?: boolean }) {
   const [t, setT] = useState(0)
-  const animar = !reduzMovimento()
+  // Apresentação (home): câmera travada, guiada pelo scroll. Explorar (/mapa): zoom e arrasto livres.
+  const animar = !interativo && !reduzMovimento()
   // Centro da câmera = centro da caixa das rotas (cai para Messejana sem dados).
   const centro = useMemo(() => {
     const pts = rotas?.features.flatMap((f) => f.geometry.coordinates) ?? []
@@ -82,8 +83,8 @@ export function Mapa({ rotas, criterio }: { rotas: Rotas | null; criterio: Crite
     : []
 
   return (
-    <DeckGL initialViewState={vista} controller layers={layers}>
-      <Map mapStyle={BASE} reuseMaps />
+    <DeckGL initialViewState={vista} controller={interativo} layers={layers}>
+      <Map mapStyle={BASE} reuseMaps interactive={interativo} />
     </DeckGL>
   )
 }
