@@ -32,7 +32,10 @@ export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | n
     const pts = rotas?.features.flatMap((f) => f.geometry.coordinates) ?? []
     if (!pts.length) return MESSEJANA
     const lons = pts.map((p) => p[0]), lats = pts.map((p) => p[1])
-    return { ...MESSEJANA, longitude: (Math.min(...lons) + Math.max(...lons)) / 2, latitude: (Math.min(...lats) + Math.max(...lats)) / 2 }
+    // Zoom pela maior extensão da caixa (~0,03° cabe em 14,2); viagens mais longas afastam, sem passar de 12.
+    const extensao = Math.max(Math.max(...lons) - Math.min(...lons), Math.max(...lats) - Math.min(...lats))
+    const zoom = Math.min(MESSEJANA.zoom, Math.max(12, MESSEJANA.zoom - Math.log2(Math.max(extensao, 0.03) / 0.03)))
+    return { ...MESSEJANA, zoom, longitude: (Math.min(...lons) + Math.max(...lons)) / 2, latitude: (Math.min(...lats) + Math.max(...lats)) / 2 }
   }, [rotas])
   const [vista, setVista] = useState(centro)
   useEffect(() => setVista(centro), [centro])

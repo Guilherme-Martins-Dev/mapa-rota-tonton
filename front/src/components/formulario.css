@@ -1,0 +1,24 @@
+.formulario { display: grid; gap: var(--e2); }
+.campo { position: relative; display: grid; gap: var(--e1); }
+.campo label { font-size: var(--t-1); color: var(--texto-suave); }
+.campo input, .campo select {
+  width: 100%; min-height: 44px; padding: 0 var(--e3); border: 1px solid var(--superficie-2);
+  border-radius: var(--raio); background: var(--superficie); color: var(--texto); font: inherit;
+}
+.campo input:focus-visible, .campo select:focus-visible { outline: 2px solid var(--c-distancia); outline-offset: 2px; }
+.campo__lista {
+  position: absolute; left: 0; right: 0; top: 100%; z-index: 3; margin: var(--e1) 0 0; padding: var(--e1);
+  list-style: none; max-height: 14rem; overflow-y: auto; border-radius: var(--raio); background: var(--superficie-2);
+}
+.campo__lista li { padding: var(--e2) var(--e3); border-radius: 8px; cursor: pointer; }
+.campo__lista li[aria-selected='true'] { background: var(--superficie); color: var(--c-distancia); }
+@media (hover: hover) and (pointer: fine) { .campo__lista li:hover { background: var(--superficie); } }
+.formulario__dica { margin: 0; font-size: var(--t-1); color: var(--texto-suave); }
+.formulario__erro { margin: 0; color: var(--c-alerta); }
+.formulario button[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.formulario__linha { display: grid; gap: var(--e2); }
+@media (max-width: 640px) {
+  .formulario__linha { grid-template-columns: 1fr auto; align-items: end; }
+  .formulario__dica { display: none; }
+}
