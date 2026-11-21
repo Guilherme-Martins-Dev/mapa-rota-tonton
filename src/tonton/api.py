@@ -3,6 +3,7 @@
 Rodar: uvicorn tonton.api:app --port 8000   (o front em dev faz proxy de /api).
 Endereço aceito: "lat,lon" ou nome de rua do grafo (sem acento e sem caixa). Nada é enviado a serviços externos.
 """
+import os
 import threading
 from contextlib import asynccontextmanager
 
@@ -27,7 +28,9 @@ def criar_app(G=None) -> FastAPI:
     @asynccontextmanager
     async def ciclo(_app):
         if estado["G"] is None:
-            estado["G"] = aplicar_transito_simulado(carregar_grafo())
+            # Em hospedagem o grafo vem versionado em cache/; GRAFO_VALIDADE_DIAS evita rebaixar do Overpass a cada 30 dias.
+            validade = float(os.environ.get("GRAFO_VALIDADE_DIAS", "30"))
+            estado["G"] = aplicar_transito_simulado(carregar_grafo(validade_dias=validade))
         estado["nomes"] = sorted(agrupar_por_rua(estado["G"]))
         yield
 
