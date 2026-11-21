@@ -148,7 +148,7 @@ export const CAPITULOS: Capitulo[] = [
     rotulo: 'Chegada',
     titulo: 'Agora é com você',
     texto:
-      'Digite uma origem e um destino no mapa interativo e compare as três rotas. As fontes e as respostas completas ficam na página do método.',
+      'Digite uma origem e um destino no mapa interativo e compare as três rotas. As fontes, as licenças e as respostas completas ficam na página de construção.',
     acoes: true,
     perguntas: [
       {

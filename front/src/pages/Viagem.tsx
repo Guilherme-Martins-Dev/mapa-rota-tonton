@@ -55,7 +55,7 @@ function Painel({ c, rotas, leitura }: { c: Capitulo; rotas: Rotas | null; leitu
       {c.acoes && (
         <div className="acoes">
           <Link to="/mapa" className="botao">Explorar o mapa</Link>
-          <Link to="/metodo" className="link">Ler o método completo</Link>
+          <Link to="/construcao" className="link">Como foi construído</Link>
         </div>
       )}
       {leitura && <p className="capitulo__leitura">{leitura}</p>}
