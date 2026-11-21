@@ -4,7 +4,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useEffect, useRef, useState } from 'react'
 import { Cena3D } from './components/Cena3D'
 import { Mapa } from './components/Mapa'
-import { carregarRotas, type Rotas } from './data/tipos'
+import { carregarRotas, type Criterio, type Rotas } from './data/tipos'
+import { Cartao, Metrica, SeletorCriterio } from './ui'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -17,6 +18,7 @@ const SECOES = [
 export default function App() {
   const raiz = useRef<HTMLElement>(null)
   const [rotas, setRotas] = useState<Rotas | null>(null)
+  const [criterio, setCriterio] = useState<Criterio>('tempo')
   useEffect(() => void carregarRotas().then(setRotas), [])
 
   useGSAP(
@@ -37,17 +39,20 @@ export default function App() {
   return (
     <main ref={raiz}>
       <div className="fundo">
-        <Mapa rotas={rotas} />
+        <Mapa rotas={rotas} criterio={criterio} />
       </div>
       <div className="cena3d">
         <Cena3D />
       </div>
       {SECOES.map((s) => (
         <section key={s.id} id={s.id} className="secao">
-          <article className="cartao">
-            <h2>{s.titulo}</h2>
-            <p>{s.texto}</p>
-          </article>
+          <Cartao titulo={s.titulo}>{s.texto}</Cartao>
+          {s.id === 'rotas' && (
+            <>
+              <SeletorCriterio valor={criterio} onChange={setCriterio} />
+              <Metrica valor="1,84" unidade="km" rotulo="distância" criterio={criterio} melhor />
+            </>
+          )}
         </section>
       ))}
     </main>

@@ -1,6 +1,7 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Mesh } from 'three'
+import { corCriterio } from '../cores'
 
 /** Placeholder da cena 3D (Fase 4 troca por modelos reais .glb). */
 function Peca() {
@@ -11,7 +12,7 @@ function Peca() {
   return (
     <mesh ref={ref}>
       <icosahedronGeometry args={[1, 1]} />
-      <meshStandardMaterial color="#ffbe3c" flatShading />
+      <meshStandardMaterial color={`rgb(${corCriterio('tempo').join(',')})`} flatShading />
     </mesh>
   )
 }

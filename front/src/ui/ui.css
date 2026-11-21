@@ -1,0 +1,29 @@
+/* Design system: superfícies separadas por degrau de tom, sem linhas finas, sem gradiente, sem sombra em repouso. */
+.cartao { max-width: 28rem; padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
+.cartao h2 { margin: 0 0 var(--e2); font-size: var(--t2); line-height: 1.15; font-weight: 600; text-wrap: balance; }
+.cartao p { margin: 0; font-size: var(--t0); line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
+
+.metrica { display: inline-flex; flex-direction: column; gap: var(--e1); align-self: flex-start; padding: var(--e2) var(--e3); background: var(--superficie-2); border-radius: var(--e2); font-variant-numeric: tabular-nums; }
+.metrica__valor { font-size: var(--t2); font-weight: 600; line-height: 1; }
+.metrica__rotulo { font-size: var(--t-1); color: var(--texto-suave); }
+.metrica[data-melhor='true'] .metrica__valor { color: var(--cor-criterio, var(--texto)); }
+
+.seletor { display: inline-flex; align-self: flex-start; gap: var(--e1); padding: var(--e1); margin: 0; border: 0; background: var(--superficie); border-radius: 999px; }
+.seletor label { position: relative; }
+.seletor input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.seletor span { display: block; padding: var(--e2) var(--e3); border-radius: 999px; font-size: var(--t-1); color: var(--texto-suave); transition: background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.seletor input:hover + span { background: var(--superficie-2); color: var(--texto); }
+.seletor input:checked + span { background: var(--cor-criterio); color: var(--sobre-cor); font-weight: 600; }
+.seletor input:focus-visible + span { outline: 2px solid var(--texto); outline-offset: 2px; }
+
+.botao { appearance: none; border: 0; padding: var(--e3) var(--e4); background: var(--texto); color: var(--fundo); font: 600 var(--t0)/1 var(--fonte); border-radius: 999px; cursor: pointer; transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+.botao:hover { opacity: 0.9; }
+.botao:active { transform: scale(0.97); }
+.botao:disabled { opacity: 0.4; cursor: not-allowed; }
+.botao:focus-visible { outline: 2px solid var(--texto); outline-offset: 3px; }
+
+[data-criterio='distancia'] { --cor-criterio: var(--c-distancia); }
+[data-criterio='tempo'] { --cor-criterio: var(--c-tempo); }
+[data-criterio='consumo'] { --cor-criterio: var(--c-consumo); }
+
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; } }

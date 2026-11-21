@@ -1,17 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600&family=JetBrains+Mono:wght@400&display=swap');
+/* Hallmark/taste: tokens únicos; nenhum literal de cor ou fonte fora deste bloco. */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600&display=swap');
 
 :root {
+  /* cor: um fundo, uma tinta, três cores de critério com papel fixo */
   --fundo: #0a0e14;
   --superficie: #121821;
-  --borda: #ffffff1f;
+  --superficie-2: #1a2230;
   --texto: #e8edf3;
-  --texto-suave: #97a3b3;
+  --texto-suave: #a5b0be;
   --c-distancia: #4cc9f0;
   --c-tempo: #ffbe3c;
   --c-consumo: #7bd88f;
   --c-alerta: #ff6b6b;
-  --fonte: 'Inter Tight', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sobre-cor: #0a0e14; /* texto sobre fundo de critério */
+  --veu: rgb(10 14 20 / 0.92);
+
+  /* tipo: uma família, escala ~1.25 */
+  --fonte: 'Instrument Sans', system-ui, sans-serif;
+  --t-1: 0.875rem;
+  --t0: 1rem;
+  --t1: 1.25rem;
+  --t2: 1.5625rem;
+  --t3: 1.953rem;
+  --t4: clamp(2.25rem, 5vw, 3.815rem);
+
+  /* espaço: base 4px */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 16px;
+  --e4: 24px;
+  --e5: 32px;
+  --e6: 48px;
+  --e7: 64px;
   --raio: 12px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur: 240ms;
 }
