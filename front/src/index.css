@@ -1,9 +1,109 @@
-:root { color-scheme: dark; --fundo: #0b0d10; --texto: #eef1f4; --acento: #ffbe3c; font-family: system-ui, sans-serif; }
+@import './tokens.css';
+:root { color-scheme: dark; font-family: var(--fonte); }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--fundo); color: var(--texto); }
+html, body { overflow-x: clip; }
+body { margin: 0; background: var(--fundo); color: var(--texto); font-size: var(--t0); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.fundo, .fundo * { pointer-events: none; }
 .fundo { position: fixed; inset: 0; z-index: 0; }
-.cena3d { position: fixed; right: 4vw; bottom: 4vh; width: min(30vw, 280px); aspect-ratio: 1; z-index: 1; pointer-events: none; }
-.secao { position: relative; z-index: 2; min-height: 100vh; display: flex; align-items: center; padding: 0 clamp(16px, 6vw, 80px); pointer-events: none; }
-.cartao { max-width: 28rem; padding: 1.5rem; background: color-mix(in srgb, var(--fundo) 85%, transparent); border: 1px solid #ffffff22; border-radius: 12px; pointer-events: auto; }
-.cartao h2 { margin: 0 0 .5rem; color: var(--acento); text-wrap: balance; }
-:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.cena3d { position: fixed; right: 4vw; bottom: 4vh; width: min(70vw, 820px); aspect-ratio: 16 / 10; z-index: 4; pointer-events: none; transform-origin: center; }
+.secao { position: relative; z-index: 2; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--e4); padding: 0 clamp(16px, 6vw, 80px); pointer-events: none; }
+.secao > * { pointer-events: auto; }
+:focus-visible { outline: 2px solid var(--texto); outline-offset: 2px; }
+
+/* barra simples: marca, dois links */
+.barra { position: fixed; inset: 0 0 auto 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: var(--e3) clamp(16px, 6vw, 80px); background: var(--veu); }
+.barra a { color: var(--texto); text-decoration: none; font-size: var(--t-1); }
+.barra .marca { font-weight: 600; font-size: var(--t0); }
+.barra nav { display: flex; gap: var(--e4); }
+.barra nav a { color: var(--texto-suave); }
+.barra nav a.active { color: var(--texto); font-weight: 600; }
+
+h1 { margin: 0 0 var(--e3); font-size: var(--t4); line-height: 1.05; font-weight: 600; text-wrap: balance; }
+.cartao h1 + p { margin: 0; }
+.acoes { display: flex; align-items: center; gap: var(--e4); }
+a.botao { display: inline-block; text-decoration: none; }
+.link { color: var(--texto); }
+.nota { margin: 0; max-width: 28rem; font-size: var(--t-1); color: var(--texto-suave); }
+
+/* viagem: seção pinada com o carro na rua; cada trecho do caminho é um capítulo */
+.viagem { position: relative; z-index: 3; height: 100svh; overflow: clip; } /* transparente: o mapa fixo aparece até a rua surgir */
+.viagem__cena { position: absolute; inset: 0; opacity: 0; }
+.viagem--lista .viagem__cena { opacity: 1; background: var(--fundo); }
+.viagem--mergulho .viagem__painel, .viagem--mergulho .viagem__capitulos { opacity: 0; pointer-events: none; }
+.viagem__painel, .viagem__capitulos { transition: opacity var(--dur) var(--ease); }
+.viagem__painel { position: absolute; left: clamp(16px, 6vw, 80px); top: calc(var(--e7) + var(--e4)); width: min(30rem, calc(100vw - 32px)); max-height: calc(100svh - var(--e7) - var(--e4) - var(--e5)); overflow-y: auto; padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
+.capitulo { display: grid; gap: var(--e3); animation: entrar 260ms var(--ease) both; }
+.capitulo h3 { margin: 0; font-size: var(--t2); font-weight: 600; text-wrap: balance; }
+.capitulo p { margin: 0; line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
+.capitulo__metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
+.capitulo__perguntas { display: grid; gap: var(--e1); }
+.capitulo__perguntas details { padding: var(--e2) var(--e3); border-radius: 8px; background: var(--superficie); }
+.capitulo__perguntas summary { min-height: 24px; color: var(--texto); font-weight: 500; cursor: pointer; }
+.capitulo__perguntas summary:focus-visible { outline: 2px solid var(--c-distancia); outline-offset: 2px; }
+.capitulo__perguntas details p { margin-top: var(--e2); font-size: var(--t-1); }
+.capitulo .capitulo__leitura { color: var(--c-tempo); font-weight: 600; font-variant-numeric: tabular-nums; }
+.viagem__capitulos { position: absolute; right: clamp(12px, 3vw, 40px); top: 50%; transform: translateY(-50%); }
+.viagem__capitulos ol { display: grid; gap: var(--e1); margin: 0; padding: 0; list-style: none; }
+.viagem__capitulos button { display: flex; align-items: center; gap: var(--e2); min-height: 44px; padding: 0 var(--e3) 0 var(--e1); border: 0; border-radius: 999px; background: var(--veu); color: var(--texto-suave); font: inherit; cursor: pointer; transition: color var(--dur) var(--ease); }
+.viagem__capitulos button:focus-visible { outline: 2px solid var(--c-distancia); outline-offset: 2px; }
+.viagem__num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--superficie-2); color: var(--texto); font-size: var(--t-1); font-variant-numeric: tabular-nums; transition: background var(--dur) var(--ease); }
+.viagem__capitulos button[aria-current='step'] { color: var(--texto); }
+.viagem__capitulos button[aria-current='step'] .viagem__num { background: var(--c-tempo); color: var(--sobre-cor); }
+@media (hover: hover) and (pointer: fine) { .viagem__capitulos button:hover { color: var(--texto); } }
+.viagem--lista { height: auto; overflow: visible; }
+.viagem--lista .viagem__cena { position: relative; height: 60svh; }
+.viagem__lista { display: grid; gap: var(--e5); max-width: 42rem; margin: 0 auto; padding: var(--e6) var(--e4); }
+.viagem--lista .capitulo { padding: var(--e4); border-radius: var(--raio); background: var(--veu); animation: none; }
+.rodape { position: relative; z-index: 3; padding: var(--e6) clamp(16px, 6vw, 80px); background: var(--fundo); }
+.rodape p { max-width: 60ch; margin: 0; font-size: var(--t-1); line-height: 1.6; color: var(--texto-suave); }
+@media (max-width: 640px) {
+  .viagem__painel { left: var(--e3); right: var(--e3); top: calc(var(--e7) + var(--e2)); width: auto; max-height: 52svh; padding: var(--e3); }
+  .capitulo__metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .capitulo__metricas > * { flex: none; }
+  .capitulo { gap: var(--e2); }
+  .capitulo h3 { font-size: var(--t1); }
+  .capitulo p { font-size: var(--t-1); line-height: 1.5; }
+  .viagem__capitulos { top: auto; right: 0; bottom: var(--e3); left: 0; transform: none; }
+  .viagem__capitulos ol { display: flex; justify-content: center; gap: var(--e1); }
+  .viagem__capitulos button { padding: 0; width: 44px; justify-content: center; }
+  .viagem__nome { display: none; }
+}
+
+/* explorar: mapa livre + painel */
+.explorar { position: relative; min-height: 100svh; }
+.explorar .fundo, .explorar .fundo * { pointer-events: auto; }
+.painel { position: fixed; left: clamp(16px, 4vw, 48px); bottom: var(--e5); z-index: 2; display: flex; flex-direction: column; gap: var(--e3); max-width: min(32rem, calc(100vw - 32px)); padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
+.painel { max-height: calc(100svh - 96px); overflow-y: auto; }
+.metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
+
+/* página de texto */
+.texto { max-width: 42rem; margin: 0 auto; padding: calc(var(--e7) + var(--e5)) var(--e4) var(--e7); }
+.texto h2 { margin: var(--e6) 0 var(--e2); font-size: var(--t2); font-weight: 600; }
+.texto p { margin: 0; line-height: 1.7; color: var(--texto-suave); text-wrap: pretty; }
+
+/* ---- Fase 6: movimento ---- */
+@keyframes entrar { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.texto, .painel { animation: entrar 260ms var(--ease) both; }
+.barra nav a, .link { transition: color var(--dur) var(--ease); }
+@media (hover: hover) and (pointer: fine) {
+  .barra nav a:hover, .link:hover { color: var(--texto); }
+  .botao:hover { opacity: 0.9; }
+}
+.botao:active { transform: scale(0.97); }
+
+/* painel do mapa em telas estreitas: folha na base, métricas rolam na horizontal */
+@media (max-width: 640px) {
+  .painel { max-height: 70svh; left: 0; right: 0; bottom: 0; max-width: none; padding: var(--e3); border-radius: var(--raio) var(--raio) 0 0; gap: var(--e2); }
+  .metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .metricas > * { flex: none; }
+  .painel .nota { display: none; }
+  .painel .seletor { align-self: stretch; }
+  .painel .seletor label { flex: 1; }
+  .painel .seletor span { padding-inline: var(--e2); font-size: 0.8125rem; text-align: center; white-space: nowrap; }
+  .secao { padding-inline: var(--e3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .texto, .painel, .capitulo { animation: none; }
+}

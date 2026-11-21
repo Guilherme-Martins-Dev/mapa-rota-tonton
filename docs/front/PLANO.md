@@ -11,12 +11,12 @@ Stack: React + TypeScript + Vite, deck.gl + MapLibre (mapa/rotas), GSAP ScrollTr
 | Fase | Skills | Entrega | Status |
 |---|---|---|---|
 | 0 Correção estrutural | web-design-guidelines | Scaffold Vite+TS limpo, lint, a11y básica | feito (branch front/fase-0-scaffold) |
-| 1 Branding e DNA | design-dna, refero | `DESIGN.md`: paleta, tipografia, tom | pendente |
-| 2 Design system | refactoring-ui, 21st, taste, hallmark | Tokens + componentes base | pendente |
-| 3 Arquitetura | context7, serena | Estrutura de pastas, loader de GeoJSON, tipos | pendente |
-| 4 Cena e scrollytelling | build-threejs-scroll-worlds, react-three-fiber, shader-dev, gsap-scrolltrigger | Seções pinadas + deck.gl animado | pendente |
-| 5 Conteúdo e páginas | context7 | Textos das seções, página de método | pendente |
-| 6 Refino de movimento | emil-design-eng, motion-design, review-animations | Easing, reduced-motion | pendente |
+| 1 Branding e DNA | design-dna, refero | `DESIGN.md`: paleta, tipografia, tom | feito, sem Refero (login pendente) |
+| 2 Design system | refactoring-ui, 21st, taste, hallmark | Tokens + componentes base | feito (sem 21st: MCP sem login) |
+| 3 Arquitetura | context7, serena | Estrutura de pastas, loader de GeoJSON, tipos | feito (serena sim; context7 sem login) |
+| 4 Cena e scrollytelling | build-threejs-scroll-worlds, react-three-fiber, shader-dev, gsap-scrolltrigger | Seções pinadas + deck.gl animado | feito (texturas procedurais, shader, pin; modelos ainda low-poly) |
+| 5 Conteúdo e páginas | context7 | Textos das seções, página de método | feito (rotas /, /mapa, /metodo; context7 sem login) |
+| 6 Refino de movimento | emil-design-eng, motion-design, review-animations | Easing, reduced-motion | feito (+ texturas PBR dos .glb) |
 | 7 Validação e publicação | chrome-devtools-mcp, playwright, web-design-guidelines, security-guidance | Lighthouse, e2e, deploy | pendente |
 
 ## Regras de economia de contexto

@@ -1,27 +1,69 @@
+import { Environment, Lightformer, useGLTF } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
-import type { Mesh } from 'three'
+import type { Group } from 'three'
+import { MathUtils } from 'three'
+import { CARRO_GLB as CARRO } from '../cena/modelos'
+import { Chao } from '../cena/Chao'
+import { usePausa, reduzMovimento } from '../cena/pausa'
+import { MERGULHO, progresso, viagem } from '../cena/progresso'
+import { corToken } from '../cores'
 
-/** Placeholder da cena 3D (Fase 4 troca por modelos reais .glb). */
-function Peca() {
-  const ref = useRef<Mesh>(null)
+const PREDIO = '/models/predio.glb'
+
+/** Carro: gira com o scroll e se afasta para dar lugar ao prédio na segunda metade. */
+function Carro() {
+  const ref = useRef<Group>(null)
+  const { scene } = useGLTF(CARRO)
   useFrame((_, dt) => {
-    if (ref.current) ref.current.rotation.y += dt * 0.4
+    const g = ref.current
+    if (!g) return
+    const p = progresso.valor
+    g.rotation.y = MathUtils.damp(g.rotation.y, -0.6 + p * Math.PI * 2, 4, dt)
+    g.position.x = MathUtils.damp(g.position.x, MathUtils.lerp(0, -2.4, MathUtils.smoothstep(p, 0.5, 0.8)), 4, dt)
   })
-  return (
-    <mesh ref={ref}>
-      <icosahedronGeometry args={[1, 1]} />
-      <meshStandardMaterial color="#ffbe3c" flatShading />
-    </mesh>
-  )
+  return <primitive ref={ref} object={scene} scale={0.55} position={[0, -0.6, 0]} />
+}
+
+/** Prédio: entra pela direita conforme o scroll avança. */
+function Predio() {
+  const ref = useRef<Group>(null)
+  const { scene } = useGLTF(PREDIO)
+  useFrame((_, dt) => {
+    const g = ref.current
+    if (!g) return
+    const alvo = MathUtils.lerp(5, 1.6, MathUtils.smoothstep(progresso.valor, 0.4, 0.8))
+    g.position.x = MathUtils.damp(g.position.x, alvo, 4, dt)
+  })
+  return <primitive ref={ref} object={scene} scale={0.2} position={[5, -0.62, 0]} />
+}
+
+/** O carro do hero só aparece até o fim do mergulho; depois disso o canvas para. */
+const heroVisivel = () => reduzMovimento() || viagem.valor < MERGULHO + 0.02
+
+function Pausa() {
+  usePausa(heroVisivel)
+  return null
 }
 
 export function Cena3D() {
   return (
-    <Canvas camera={{ position: [0, 0, 4] }} dpr={[1, 2]} aria-hidden="true">
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[3, 3, 3]} />
-      <Peca />
+    <Canvas camera={{ position: [0, 1.2, 6], fov: 40 }} dpr={[1, 2]} aria-hidden="true">
+      <hemisphereLight args={[corToken('texto'), corToken('superficie-2'), 0.4]} />
+      <directionalLight position={[4, 6, 3]} intensity={1.6} />
+      {/* Reflexos: ambiente gerado localmente (sem baixar HDRI) com três painéis de luz. */}
+      <Environment resolution={256}>
+        <Lightformer form="rect" intensity={3} position={[0, 5, -6]} scale={[12, 4, 1]} />
+        <Lightformer form="rect" intensity={2} position={[-6, 1, 2]} scale={[2, 6, 1]} />
+        <Lightformer form="rect" intensity={1.5} position={[6, 2, 3]} scale={[2, 5, 1]} />
+      </Environment>
+      <Pausa />
+      <Chao />
+      <Carro />
+      <Predio />
     </Canvas>
   )
 }
+
+useGLTF.preload(CARRO)
+useGLTF.preload(PREDIO)
