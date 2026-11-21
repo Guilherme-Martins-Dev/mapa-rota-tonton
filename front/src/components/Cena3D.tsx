@@ -8,6 +8,7 @@ import { Chao } from '../cena/Chao'
 import { usePausa, reduzMovimento } from '../cena/pausa'
 import { MERGULHO, progresso, viagem } from '../cena/progresso'
 import { corToken } from '../cores'
+import { useTema } from '../theme/tema'
 
 
 /** Carro: gira com o scroll. */
@@ -34,9 +35,10 @@ function Pausa() {
 }
 
 export function Cena3D() {
+  useTema() // relê os tokens (luz do hemisfério) quando o tema muda
   return (
     <Canvas camera={{ position: [0, 1.2, 6], fov: 40 }} dpr={[1, 2]} aria-hidden="true">
-      <hemisphereLight args={[corToken('texto'), corToken('superficie-2'), 0.4]} />
+      <hemisphereLight key={corToken('fundo')} args={[corToken('texto'), corToken('superficie-2'), 0.4]} />
       <directionalLight position={[4, 6, 3]} intensity={1.6} />
       {/* Reflexos: ambiente gerado localmente (sem baixar HDRI) com três painéis de luz. */}
       <Environment resolution={256}>

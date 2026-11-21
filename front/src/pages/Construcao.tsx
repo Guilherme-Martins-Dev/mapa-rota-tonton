@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  COMANDOS, DECISOES, ETAPAS, FONTES, FRONT_TECNICAS, INDICE, LIMITES, NIVEIS, NUMEROS, PERGUNTAS, PILHA, REFERENCIAS,
-  type Nivel,
-} from '../conteudo/construcao'
-import { AUTORIA, CONTEXTO, PERFIL_PROFESSOR } from '../conteudo/equipe'
+import type { Nivel } from '../conteudo/construcao'
+import { useConteudo } from '../i18n/conteudo'
+import { useT } from '../i18n/useIdioma'
 import { Tx } from '../ui/Tx'
 import './construcao.css'
 
 /** Só no desktop, onde o índice e a resposta ficam fixos: ali a leitura acompanha a rolagem. */
 const desktop = () => window.matchMedia('(min-width: 960px)').matches
 
-const rotuloNivel = (n: Nivel) => NIVEIS.find((x) => x.id === n)?.rotulo
-
 /** Página de construção: como o projeto foi feito, com fontes, licenças e perguntas e respostas por nível. */
 export default function Construcao() {
+  const t = useT()
+  const { niveis: NIVEIS, indice: INDICE, numeros: NUMEROS, etapas: ETAPAS, decisoes: DECISOES, frontTecnicas: FRONT_TECNICAS, pilha: PILHA,
+    fontes: FONTES, limites: LIMITES, perguntas: PERGUNTAS, referencias: REFERENCIAS, comandos: COMANDOS, autoria } = useConteudo()
+  const rotuloNivel = (n: Nivel) => NIVEIS.find((x) => x.id === n)?.rotulo
   const [nivel, setNivel] = useState<Nivel | 'todos'>('todos')
   const [sel, setSel] = useState(0)
-  const lista = useMemo(() => PERGUNTAS.filter((q) => nivel === 'todos' || q.nivel === nivel), [nivel])
+  const lista = useMemo(() => PERGUNTAS.filter((q) => nivel === 'todos' || q.nivel === nivel), [nivel, PERGUNTAS])
   const atual = lista[Math.min(sel, lista.length - 1)]
   const contagem = (n: Nivel) => PERGUNTAS.filter((q) => q.nivel === n).length
   const [secao, setSecao] = useState<string>(INDICE[0].id)
@@ -30,7 +30,7 @@ export default function Construcao() {
     )
     INDICE.forEach((i) => { const el = document.getElementById(i.id); if (el) io.observe(el) })
     return () => io.disconnect()
-  }, [])
+  }, [INDICE])
 
   // Pergunta em foco: a resposta fixa troca conforme a lista passa pela faixa de leitura.
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function Construcao() {
 
   return (
     <main className="constr">
-      <nav className="constr__indice" aria-label="Nesta página">
+      <nav className="constr__indice" aria-label={t('constrNav')}>
         <ol>
           {INDICE.map((i) => (
             <li key={i.id}><a href={`#${i.id}`} aria-current={secao === i.id ? 'location' : undefined}>{i.rotulo}</a></li>
@@ -60,12 +60,9 @@ export default function Construcao() {
 
       <div className="constr__corpo">
         <header id="resumo">
-          <h1>Como este site foi construído</h1>
-          <p className="constr__lead">
-            O sistema escolhe rotas em Messejana, Fortaleza, por distância, tempo ou consumo de combustível. O site mostra, passo a passo, como
-            ele decide. Aqui estão o caminho, as fontes, as licenças e as respostas para perguntas do básico ao avançado.
-          </p>
-          <p className="constr__lead">{AUTORIA} {PERFIL_PROFESSOR} {CONTEXTO}</p>
+          <h1>{t('constrTitulo')}</h1>
+          <p className="constr__lead">{t('constrLead')}</p>
+          <p className="constr__lead">{autoria}</p>
           <dl className="constr__numeros">
             {NUMEROS.map((n) => (
               <div key={n.rotulo}>
@@ -77,7 +74,7 @@ export default function Construcao() {
         </header>
 
         <section id="arquitetura" aria-labelledby="t-arq">
-          <h2 id="t-arq">Do mapa ao navegador</h2>
+          <h2 id="t-arq">{t('constrArq')}</h2>
           <ol className="constr__etapas">
             {ETAPAS.map((e) => (
               <li key={e.titulo}>
@@ -89,11 +86,11 @@ export default function Construcao() {
         </section>
 
         <section id="back" aria-labelledby="t-back">
-          <h2 id="t-back">Back-end: o que foi decidido e medido</h2>
-          <p className="constr__intro">Cada decisão tem um documento no repositório. Os números abaixo vêm deles.</p>
+          <h2 id="t-back">{t('constrBack')}</h2>
+          <p className="constr__intro">{t('constrBackIntro')}</p>
           <table className="constr__tabela">
             <thead>
-              <tr><th scope="col">Decisão</th><th scope="col">Resultado</th><th scope="col">Documento</th></tr>
+              <tr><th scope="col">{t('constrDecisao')}</th><th scope="col">{t('constrResultado')}</th><th scope="col">{t('constrDocumento')}</th></tr>
             </thead>
             <tbody>
               {DECISOES.map((d) => (
@@ -108,7 +105,7 @@ export default function Construcao() {
         </section>
 
         <section id="front" aria-labelledby="t-front">
-          <h2 id="t-front">Front-end: técnicas</h2>
+          <h2 id="t-front">{t('constrFront')}</h2>
           <dl className="constr__lista">
             {FRONT_TECNICAS.map((t) => (
               <div key={t.titulo}>
@@ -117,7 +114,7 @@ export default function Construcao() {
               </div>
             ))}
           </dl>
-          <h3 className="constr__sub">Pilha</h3>
+          <h3 className="constr__sub">{t('constrPilha')}</h3>
           <dl className="constr__lista">
             {PILHA.map(([k, v]) => (
               <div key={k}>
@@ -129,7 +126,7 @@ export default function Construcao() {
         </section>
 
         <section id="dados" aria-labelledby="t-dados">
-          <h2 id="t-dados">Dados, modelos e licenças</h2>
+          <h2 id="t-dados">{t('constrDados')}</h2>
           <dl className="constr__lista">
             {FONTES.map((f) => (
               <div key={f.nome}>
@@ -141,7 +138,7 @@ export default function Construcao() {
         </section>
 
         <section id="limites" aria-labelledby="t-lim">
-          <h2 id="t-lim">O que o projeto não garante</h2>
+          <h2 id="t-lim">{t('constrLimites')}</h2>
           <ul className="constr__limites">
             {LIMITES.map((l) => (
               <li key={l}>{l}</li>
@@ -150,9 +147,9 @@ export default function Construcao() {
         </section>
 
         <section id="perguntas" aria-labelledby="t-perg">
-          <h2 id="t-perg">Perguntas e respostas</h2>
-          <div className="constr__filtro" role="group" aria-label="Filtrar por nível">
-            <button type="button" aria-pressed={nivel === 'todos'} onClick={() => filtrar('todos')}>Todas {PERGUNTAS.length}</button>
+          <h2 id="t-perg">{t('constrPerguntas')}</h2>
+          <div className="constr__filtro" role="group" aria-label={t('constrFiltro')}>
+            <button type="button" aria-pressed={nivel === 'todos'} onClick={() => filtrar('todos')}>{t('constrTodas')} {PERGUNTAS.length}</button>
             {NIVEIS.map((n) => (
               <button key={n.id} type="button" aria-pressed={nivel === n.id} onClick={() => filtrar(n.id)}>
                 {n.rotulo} {contagem(n.id)}
@@ -182,7 +179,7 @@ export default function Construcao() {
         </section>
 
         <section id="referencias" aria-labelledby="t-ref">
-          <h2 id="t-ref">Referências</h2>
+          <h2 id="t-ref">{t('constrRefs')}</h2>
           <ol className="constr__refs">
             {REFERENCIAS.map((r) => (
               <li key={r}>{r}</li>
@@ -191,8 +188,8 @@ export default function Construcao() {
         </section>
 
         <section id="reproduzir" aria-labelledby="t-rep">
-          <h2 id="t-rep">Como reproduzir</h2>
-          <p className="constr__intro">Com Python 3 e Node instalados, na raiz do repositório. A chave da TomTom, se usada, fica num .env fora do repositório.</p>
+          <h2 id="t-rep">{t('constrRepro')}</h2>
+          <p className="constr__intro">{t('constrReproIntro')}</p>
           <dl className="constr__lista">
             {COMANDOS.map((c) => (
               <div key={c.cmd}>

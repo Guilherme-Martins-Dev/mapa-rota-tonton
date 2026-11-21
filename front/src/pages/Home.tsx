@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { lazy, Suspense, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { progresso } from '../cena/progresso'
-import { HERO } from '../conteudo/secoes'
+import { useT } from '../i18n/useIdioma'
 import { useRotas } from '../data/useRotas'
 import { Viagem } from './Viagem'
 
@@ -19,6 +19,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP)
  * da rota e a viagem pelo projeto começa (ver Viagem.tsx).
  */
 export default function Home() {
+  const t = useT()
   const raiz = useRef<HTMLElement>(null)
   const dados = useRotas()
   const rotas = dados.estado === 'pronto' ? dados.rotas : null
@@ -54,12 +55,12 @@ export default function Home() {
 
       <section id="inicio" className="secao">
         <div className="cartao">
-          <h1>{HERO.titulo}</h1>
-          <p>{HERO.texto}</p>
+          <h1>{t('heroTitulo')}</h1>
+          <p>{t('heroTexto')}</p>
         </div>
         <div className="acoes entra">
-          <Link to="/mapa" className="botao">Explorar o mapa</Link>
-          <a href="#viagem" className="botao botao--contorno">Ver como funciona <span className="botao__seta" aria-hidden="true">↓</span></a>
+          <Link to="/mapa" className="botao">{t('explorarMapa')}</Link>
+          <a href="#viagem" className="botao botao--contorno">{t('verComoFunciona')} <span className="botao__seta" aria-hidden="true">↓</span></a>
         </div>
       </section>
 

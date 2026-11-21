@@ -8,13 +8,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { Map } from 'react-map-gl/maplibre'
 import { MERGULHO, progresso, viagem } from '../cena/progresso'
 import { corCriterio, corRgb } from '../cores'
+import { useTema } from '../theme/tema'
 import { rotaDoCriterio, type Criterio, type RotaFeature, type Rotas } from '../data/tipos'
 
 // O Vite não resolve o worker do MapLibre sozinho: aponta a URL do arquivo empacotado.
 setWorkerUrl(workerUrl)
 
 const MESSEJANA = { longitude: -38.4935, latitude: -3.8267, zoom: 14.2, pitch: 45, bearing: 0 }
-const BASE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+const BASE = {
+  dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  light: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+}
 const reduzMovimento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /** Timestamps 0..1 proporcionais ao índice do vértice (o traço percorre a rota de ponta a ponta). */
@@ -24,6 +28,7 @@ function tempos(f: RotaFeature): number[] {
 }
 
 export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | null; criterio: Criterio; interativo?: boolean }) {
+  const tema = useTema() // refaz as cores dos tokens e troca o mapa base
   const [t, setT] = useState(0)
   // Apresentação (home): câmera travada, guiada pelo scroll. Explorar (/mapa): zoom e arrasto livres.
   const animar = !interativo && !reduzMovimento()
@@ -90,7 +95,7 @@ export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | n
           data: rotas.features,
           getPath: (f) => f.geometry.coordinates as [number, number][],
           getColor: (f) => [...cor, f === rota ? 255 : 60] as [number, number, number, number],
-          updateTriggers: { getColor: [criterio, rota] },
+          updateTriggers: { getColor: [criterio, rota, tema] },
           getWidth: 14,
           widthUnits: 'meters',
         }),
@@ -102,6 +107,7 @@ export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | n
                 getPath: (f) => f.geometry.coordinates as [number, number][],
                 getTimestamps: tempos,
                 getColor: corRgb('texto'),
+                updateTriggers: { getColor: [tema] },
                 widthMinPixels: 4,
                 trailLength: 0.35,
                 currentTime: t,
@@ -113,7 +119,7 @@ export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | n
 
   return (
     <DeckGL initialViewState={vista} controller={interativo} layers={layers}>
-      <Map mapStyle={BASE} reuseMaps interactive={interativo} />
+      <Map mapStyle={BASE[tema]} reuseMaps interactive={interativo} />
     </DeckGL>
   )
 }

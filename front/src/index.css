@@ -1,5 +1,6 @@
 @import './tokens.css';
 :root { color-scheme: dark; font-family: var(--fonte); }
+:root[data-theme='light'] { color-scheme: light; }
 * { box-sizing: border-box; }
 html, body { overflow-x: clip; }
 body { margin: 0; background: var(--fundo); color: var(--texto); font-size: var(--t0); }
@@ -113,4 +114,22 @@ a.botao { display: inline-block; text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .texto, .painel, .capitulo { animation: none; }
+}
+
+/* botões da barra (idioma e tema) */
+.barra nav { align-items: center; }
+.barra__botao { display: inline-grid; place-items: center; min-width: 36px; height: 36px; padding: 0 var(--e2); border: 1px solid var(--linha); border-radius: var(--p-raio-pilula); background: transparent; color: var(--texto); font: inherit; font-size: var(--t-1); font-weight: 600; cursor: pointer; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.barra__botao:hover { border-color: var(--texto-suave); }
+.barra__botao:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+
+/* Troca de tema com o carro (theme/carro.ts): o script escreve o recorte; aqui só saem as animações padrão. */
+.carro-tema { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2147483000; view-transition-name: carro-tema; }
+html.carro-ativa::view-transition-old(root),
+html.carro-ativa::view-transition-new(root),
+html.carro-ativa::view-transition-group(carro-tema),
+html.carro-ativa::view-transition-new(carro-tema) { animation: none; mix-blend-mode: normal; }
+html.carro-ativa::view-transition-old(carro-tema) { display: none; }
+/* Sem View Transitions: as cores mudam em 0,45 s. */
+html.tema-fade, html.tema-fade *, html.tema-fade *::before, html.tema-fade *::after {
+  transition: background-color 0.45s ease, border-color 0.45s ease, color 0.45s ease, fill 0.45s ease !important;
 }

@@ -13,6 +13,18 @@
   --p-amber-400: #ffbe3c;
   --p-green-400: #7bd88f;
   --p-red-400: #ff6b6b;
+  /* tema claro */
+  --p-paper-50: #f6f4ef;
+  --p-paper-100: #ebe7dd;
+  --p-paper-200: #dcd6c8;
+  --p-paper-300: #c4bdac;
+  --p-paper-900: #141a24;
+  --p-paper-600: #4a5565;
+  --p-sky-700: #0a6c8f;
+  --p-amber-700: #a85d00;
+  --p-green-700: #2b7a3d;
+  --p-red-700: #c0392b;
+  --p-orange-600: #d9480f;
   --p-fonte-sans: 'Instrument Sans', system-ui, sans-serif;
   --p-fonte-mono: ui-monospace, 'Cascadia Code', Consolas, monospace; /* taste-skill-ignore: só para código literal (comandos e caminhos) */
   --p-raio-1: 8px;
@@ -34,6 +46,7 @@
   --foco: var(--c-distancia);
   --sobre-cor: var(--p-ink-950); /* texto sobre fundo de critério */
   --veu: rgb(10 14 20 / 0.92);
+  --carro: var(--p-sky-400); /* cor do carro (e das marcas de pneu) na troca de tema: a do tema que chega */
   --fonte: var(--p-fonte-sans);
   --fonte-codigo: var(--p-fonte-mono);
   --raio: var(--p-raio-2);
@@ -67,4 +80,21 @@
   --botao-pilula-ativo-texto: var(--sobre-cor);
   --alvo-toque: 44px;
   --leitura: 46rem;
+}
+
+/* Tema claro: só a camada semântica muda; as telas continuam apontando para os mesmos nomes. */
+:root[data-theme='light'] {
+  --fundo: var(--p-paper-50);
+  --superficie: var(--p-paper-100);
+  --superficie-2: var(--p-paper-200);
+  --linha: var(--p-paper-300);
+  --texto: var(--p-paper-900);
+  --texto-suave: var(--p-paper-600);
+  --c-distancia: var(--p-sky-700);
+  --c-tempo: var(--p-amber-700);
+  --c-consumo: var(--p-green-700);
+  --c-alerta: var(--p-red-700);
+  --sobre-cor: var(--p-paper-50);
+  --veu: rgb(246 244 239 / 0.92);
+  --carro: var(--p-orange-600);
 }

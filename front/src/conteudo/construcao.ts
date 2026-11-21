@@ -78,6 +78,7 @@ export const FRONT_TECNICAS: Etapa[] = [
   { titulo: 'A rua a partir da rota real', texto: 'As coordenadas da rota são projetadas num plano, os cantos são arredondados (Chaikin) e alisados por média móvel. Os prédios são sorteados com semente fixa, longe da pista e sem se sobrepor.' },
   { titulo: 'O carro e as rodas', texto: 'O Corolla vem do MeshFleet. O conversor separa as quatro rodas; elas rolam pela distância percorrida dividida pelo raio e as dianteiras esterçam nas curvas.' },
   { titulo: 'Desempenho', texto: 'Canvases fora da tela são pausados. Medido numa GPU integrada Intel UHD 620: 40, 36 e 49 fps no hero, no mergulho e na viagem; memória de JS de 169 para 68 MB. Lighthouse 100/100/100 (acessibilidade, boas práticas e SEO).' },
+  { titulo: 'Tema e idioma', texto: 'Os temas claro e escuro usam os mesmos tokens de design, e cada tema tem a sua cor de carro. A troca leva um carro derrapando pela tela: as marcas dos pneus traseiros se espalham como tinta e revelam o tema novo (View Transitions com clip-path crescente), com fade de cores ou troca imediata como reserva. O site existe em português e em inglês, e as duas escolhas ficam salvas no navegador.' },
   { titulo: 'Acessibilidade', texto: 'Com movimento reduzido a viagem vira uma lista de capítulos sem pin. Há foco visível, navegação por teclado e o painel é uma região aria-live.' },
 ]
 

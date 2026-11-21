@@ -1,12 +1,17 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import type { Criterio } from '../data/tipos'
+import { useT } from '../i18n/useIdioma'
 import './ui.css'
 
-export const CRITERIOS: { id: Criterio; rotulo: string }[] = [
-  { id: 'distancia', rotulo: 'Menor distância' },
-  { id: 'tempo', rotulo: 'Menor tempo' },
-  { id: 'consumo', rotulo: 'Menor consumo' },
-]
+/** Os três critérios, com o rótulo no idioma atual. */
+export function useCriterios(): { id: Criterio; rotulo: string }[] {
+  const t = useT()
+  return [
+    { id: 'distancia', rotulo: t('critDistancia') },
+    { id: 'tempo', rotulo: t('critTempo') },
+    { id: 'consumo', rotulo: t('critConsumo') },
+  ]
+}
 
 export function Cartao({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
@@ -31,10 +36,12 @@ export function Metrica({ valor, unidade, rotulo, criterio, melhor }: MetricaPro
 }
 
 export function SeletorCriterio({ valor, onChange }: { valor: Criterio; onChange: (c: Criterio) => void }) {
+  const t = useT()
+  const criterios = useCriterios()
   return (
     <fieldset className="seletor" data-criterio={valor}>
-      <legend className="sr-only">Critério da rota</legend>
-      {CRITERIOS.map((c) => (
+      <legend className="sr-only">{t('critLegenda')}</legend>
+      {criterios.map((c) => (
         <label key={c.id} data-criterio={c.id}>
           <input type="radio" name="criterio" value={c.id} checked={valor === c.id} onChange={() => onChange(c.id)} />
           <span>{c.rotulo}</span>
