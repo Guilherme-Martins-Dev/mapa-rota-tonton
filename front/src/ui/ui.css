@@ -17,7 +17,6 @@
 .seletor input:focus-visible + span { outline: 2px solid var(--texto); outline-offset: 2px; }
 
 .botao { appearance: none; border: 0; padding: var(--e3) var(--e4); background: var(--texto); color: var(--fundo); font: 600 var(--t0)/1 var(--fonte); border-radius: 999px; cursor: pointer; transition: transform var(--dur) var(--ease), opacity var(--dur) var(--ease); }
-.botao:hover { opacity: 0.9; }
 .botao:active { transform: scale(0.97); }
 .botao:disabled { opacity: 0.4; cursor: not-allowed; }
 .botao:focus-visible { outline: 2px solid var(--texto); outline-offset: 3px; }

@@ -16,7 +16,7 @@ Stack: React + TypeScript + Vite, deck.gl + MapLibre (mapa/rotas), GSAP ScrollTr
 | 3 Arquitetura | context7, serena | Estrutura de pastas, loader de GeoJSON, tipos | feito (serena sim; context7 sem login) |
 | 4 Cena e scrollytelling | build-threejs-scroll-worlds, react-three-fiber, shader-dev, gsap-scrolltrigger | Seções pinadas + deck.gl animado | feito (texturas procedurais, shader, pin; modelos ainda low-poly) |
 | 5 Conteúdo e páginas | context7 | Textos das seções, página de método | feito (rotas /, /mapa, /metodo; context7 sem login) |
-| 6 Refino de movimento | emil-design-eng, motion-design, review-animations | Easing, reduced-motion | pendente |
+| 6 Refino de movimento | emil-design-eng, motion-design, review-animations | Easing, reduced-motion | feito (+ texturas PBR dos .glb) |
 | 7 Validação e publicação | chrome-devtools-mcp, playwright, web-design-guidelines, security-guidance | Lighthouse, e2e, deploy | pendente |
 
 ## Regras de economia de contexto

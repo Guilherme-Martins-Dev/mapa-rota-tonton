@@ -1,45 +1,76 @@
-// Gera modelos low-poly em .glb (PBR, com normais e UVs prontos para receber textura).
-// Uso: node scripts/gerar-modelos.mjs   ->  public/models/*.glb
-// Para texturizar depois: troque o material por baseColorTexture/normalTexture no .glb (gltf-transform) ou no Blender.
+// Gera modelos em .glb com materiais PBR e texturas procedurais (cor, normal, emissiva).
+// Uso: npm run modelos   ->  public/models/{carro,predio}.glb
+// Para trocar por texturas fotográficas: substitua os PNG embutidos (gltf-transform) ou refine no Blender.
 import { Document, NodeIO } from '@gltf-transform/core'
+import { KHRMaterialsClearcoat } from '@gltf-transform/extensions'
 import { mkdirSync } from 'node:fs'
-import { png, ruido } from './png.mjs'
+import { mapaNormal, png, ruido, ruidoSuave } from './png.mjs'
 
 const doc = new Document()
 const buf = doc.createBuffer()
+const clearcoat = doc.createExtension(KHRMaterialsClearcoat)
 
-/** Geometria em listas planas; cada face tem seus próprios vértices (normais duras, UVs 0..1). */
-function novaGeo() {
-  return { pos: [], nor: [], uv: [], idx: [] }
+// ---------- geometria ----------
+const novaGeo = () => ({ pos: [], nor: [], uv: [], idx: [] })
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+const cruz = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+const norm = (v) => {
+  const l = Math.hypot(...v) || 1
+  return v.map((c) => c / l)
 }
 
-function quad(g, p, n) {
+/** Face convexa de 4 pontos; a normal é orientada para fora de `centro` (corrige o enrolamento sozinho). */
+function face(g, pts, uvs, centro) {
+  let n = norm(cruz(sub(pts[1], pts[0]), sub(pts[2], pts[0])))
+  if (dot(n, sub(pts[0], centro)) < 0) {
+    pts = [...pts].reverse()
+    uvs = [...uvs].reverse()
+    n = n.map((c) => -c)
+  }
   const base = g.pos.length / 3
-  for (const v of p) g.pos.push(...v)
-  for (let i = 0; i < 4; i++) g.nor.push(...n)
-  g.uv.push(0, 0, 1, 0, 1, 1, 0, 1)
+  pts.forEach((p, i) => {
+    g.pos.push(...p)
+    g.nor.push(...n)
+    g.uv.push(...uvs[i])
+  })
   g.idx.push(base, base + 1, base + 2, base, base + 2, base + 3)
 }
 
-function caixa(g, [cx, cy, cz], [w, h, d]) {
+/** Caixa; `uvPorMetro` ladrilha a textura (ex.: 0.5 = uma repetição a cada 2 m). */
+function caixa(g, [cx, cy, cz], [w, h, d], { uvPorMetro = 0.5 } = {}) {
   const x = w / 2, y = h / 2, z = d / 2
+  const c = [cx, cy, cz]
   const P = (sx, sy, sz) => [cx + sx * x, cy + sy * y, cz + sz * z]
-  quad(g, [P(-1, -1, 1), P(1, -1, 1), P(1, 1, 1), P(-1, 1, 1)], [0, 0, 1])
-  quad(g, [P(1, -1, -1), P(-1, -1, -1), P(-1, 1, -1), P(1, 1, -1)], [0, 0, -1])
-  quad(g, [P(1, -1, 1), P(1, -1, -1), P(1, 1, -1), P(1, 1, 1)], [1, 0, 0])
-  quad(g, [P(-1, -1, -1), P(-1, -1, 1), P(-1, 1, 1), P(-1, 1, -1)], [-1, 0, 0])
-  quad(g, [P(-1, 1, 1), P(1, 1, 1), P(1, 1, -1), P(-1, 1, -1)], [0, 1, 0])
-  quad(g, [P(-1, -1, -1), P(1, -1, -1), P(1, -1, 1), P(-1, -1, 1)], [0, -1, 0])
+  const uv = (a, b) => [[0, 0], [a * uvPorMetro, 0], [a * uvPorMetro, b * uvPorMetro], [0, b * uvPorMetro]]
+  face(g, [P(-1, -1, 1), P(1, -1, 1), P(1, 1, 1), P(-1, 1, 1)], uv(w, h), c)
+  face(g, [P(1, -1, -1), P(-1, -1, -1), P(-1, 1, -1), P(1, 1, -1)], uv(w, h), c)
+  face(g, [P(1, -1, 1), P(1, -1, -1), P(1, 1, -1), P(1, 1, 1)], uv(d, h), c)
+  face(g, [P(-1, -1, -1), P(-1, -1, 1), P(-1, 1, 1), P(-1, 1, -1)], uv(d, h), c)
+  face(g, [P(-1, 1, 1), P(1, 1, 1), P(1, 1, -1), P(-1, 1, -1)], uv(w, d), c)
+  face(g, [P(-1, -1, -1), P(1, -1, -1), P(1, -1, 1), P(-1, -1, 1)], uv(w, d), c)
 }
 
-/** Cilindro com eixo em Z (roda); `lados` baixo mantém o peso do arquivo mínimo. */
-function cilindro(g, [cx, cy, cz], raio, largura, lados = 12) {
+/** Prisma trapezoidal: perfil (x, y) extrudado em Z. Usado na cabine do carro. */
+function prisma(g, perfil, [cx, cy, cz], largura) {
+  const z = largura / 2
+  const centro = [cx + perfil.reduce((s, p) => s + p[0], 0) / perfil.length, cy + perfil.reduce((s, p) => s + p[1], 0) / perfil.length, cz]
+  const V = (i, s) => [cx + perfil[i][0], cy + perfil[i][1], cz + s * z]
+  const uvQuad = [[0, 0], [1, 0], [1, 1], [0, 1]]
+  for (const s of [-1, 1]) face(g, [V(0, s), V(1, s), V(2, s), V(3, s)], uvQuad, centro)
+  for (let i = 0; i < perfil.length; i++) {
+    const j = (i + 1) % perfil.length
+    face(g, [V(i, -1), V(j, -1), V(j, 1), V(i, 1)], uvQuad, centro)
+  }
+}
+
+/** Cilindro com eixo em Z (roda). */
+function cilindro(g, [cx, cy, cz], raio, largura, lados = 20) {
   const z0 = cz - largura / 2, z1 = cz + largura / 2
   for (let i = 0; i < lados; i++) {
     const a0 = (i / lados) * Math.PI * 2, a1 = ((i + 1) / lados) * Math.PI * 2
     const c = (a, z) => [cx + Math.cos(a) * raio, cy + Math.sin(a) * raio, z]
-    const am = (a0 + a1) / 2
-    quad(g, [c(a0, z0), c(a1, z0), c(a1, z1), c(a0, z1)], [Math.cos(am), Math.sin(am), 0])
+    face(g, [c(a0, z0), c(a1, z0), c(a1, z1), c(a0, z1)], [[i / lados, 0], [(i + 1) / lados, 0], [(i + 1) / lados, 1], [i / lados, 1]], [cx, cy, cz])
     for (const [z, nz] of [[z1, 1], [z0, -1]]) {
       const base = g.pos.length / 3
       g.pos.push(cx, cy, z, ...c(a0, z), ...c(a1, z))
@@ -50,17 +81,18 @@ function cilindro(g, [cx, cy, cz], raio, largura, lados = 12) {
   }
 }
 
-/** Textura PNG embutida no .glb como baseColorTexture (multiplica o fator de cor). */
-function textura(nome, largura, altura, pixel) {
-  return doc.createTexture(nome).setImage(png(largura, altura, pixel)).setMimeType('image/png')
-}
+// ---------- materiais ----------
+const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+const rgba = (hex) => [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255].map(lin).concat(1)
+const tex = (nome, bytes) => doc.createTexture(nome).setImage(bytes).setMimeType('image/png')
 
-function material(nome, cor, rugosidade, metal, tex) {
-  // hex sRGB -> fator linear (glTF espera baseColorFactor linear)
-  const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
-  const rgba = [(cor >> 16) & 255, (cor >> 8) & 255, cor & 255].map(lin).concat(1)
-  const m = doc.createMaterial(nome).setBaseColorFactor(rgba).setRoughnessFactor(rugosidade).setMetallicFactor(metal)
-  if (tex) m.setBaseColorTexture(tex)
+function material(nome, hex, rugosidade, metal, opc = {}) {
+  const m = doc.createMaterial(nome).setBaseColorFactor(rgba(hex)).setRoughnessFactor(rugosidade).setMetallicFactor(metal)
+  if (opc.base) m.setBaseColorTexture(opc.base)
+  if (opc.normal) m.setNormalTexture(opc.normal).setNormalScale(opc.normalEsc ?? 1)
+  if (opc.emissiva) m.setEmissiveTexture(opc.emissiva).setEmissiveFactor([1, 1, 1])
+  if (opc.emissivoHex !== undefined) m.setEmissiveFactor(rgba(opc.emissivoHex).slice(0, 3))
+  if (opc.verniz) m.setExtension('KHR_materials_clearcoat', clearcoat.createClearcoat().setClearcoatFactor(1).setClearcoatRoughnessFactor(0.06))
   return m
 }
 
@@ -76,62 +108,151 @@ function malha(nome, g, mat) {
   return doc.createMesh(nome).addPrimitive(prim)
 }
 
+const no = (nome, g, mat) => doc.createNode(nome).setMesh(malha(nome, g, mat))
+
 async function salvar(arquivo, raiz) {
   const cena = doc.createScene(arquivo).addChild(raiz)
   doc.getRoot().setDefaultScene(cena)
-  await new NodeIO().write(`public/models/${arquivo}.glb`, doc)
+  await new NodeIO().registerExtensions([KHRMaterialsClearcoat]).write(`public/models/${arquivo}.glb`, doc)
   for (const s of doc.getRoot().listScenes()) s.dispose()
   for (const n of doc.getRoot().listNodes()) n.dispose()
   for (const m of doc.getRoot().listMeshes()) m.dispose()
 }
 
+const q = (v, passos = 24) => Math.round(v * passos) / passos // quantiza: PNG comprime melhor
+
 mkdirSync('public/models', { recursive: true })
 
-// Pintura: cinza claro com granulado e riscos finos (multiplica a cor âmbar da carroceria).
-const texPintura = textura('pintura', 128, 128, (x, y) => {
-  const g = 225 + ruido(x, y) * 30 - (y % 64 === 0 || x % 64 === 0 ? 40 : 0)
-  return [g, g, g, 255]
-})
-// Concreto: manchas de ruído em duas escalas.
-const texConcreto = textura('concreto', 128, 128, (x, y) => {
-  const g = 170 + ruido(x >> 3, y >> 3, 3) * 50 + ruido(x, y, 5) * 25
-  return [g, g, g, 255]
-})
-// Janela: moldura escura e reflexo em degradê vertical (o cinza escala a cor ciano do material).
-const texJanela = textura('janela', 64, 64, (x, y) => {
-  const borda = x < 4 || y < 4 || x > 59 || y > 59
-  const g = borda ? 60 : 150 + (y / 64) * 100
-  return [g, g, g, 255]
-})
-
-// ---- carro: carroceria, cabine/vidro, rodas ----
+// =====================================================================================
+// CARRO
+// =====================================================================================
 {
-  const carroceria = novaGeo(), vidro = novaGeo(), pneu = novaGeo()
-  caixa(carroceria, [0, 0.55, 0], [4.2, 0.7, 1.8])
-  caixa(carroceria, [0.1, 0.95, 0], [3.2, 0.12, 1.7]) // capô/teto base
-  caixa(vidro, [-0.2, 1.22, 0], [2.2, 0.55, 1.62])
-  caixa(carroceria, [-0.2, 1.54, 0], [2.0, 0.1, 1.55]) // teto
-  for (const [x, z] of [[1.35, 0.95], [1.35, -0.95], [-1.35, 0.95], [-1.35, -0.95]]) cilindro(pneu, [x, 0.38, z], 0.38, 0.3)
-  const no = doc.createNode('carro')
-    .addChild(doc.createNode('carroceria').setMesh(malha('carroceria', carroceria, material('tinta', 0xffbe3c, 0.35, 0.6, texPintura))))
-    .addChild(doc.createNode('vidro').setMesh(malha('vidro', vidro, material('vidro', 0x1a2230, 0.1, 0.2))))
-    .addChild(doc.createNode('rodas').setMesh(malha('rodas', pneu, material('pneu', 0x111418, 0.9, 0))))
-  await salvar('carro', no)
+  // Casca de laranja da pintura (normal) e variação sutil da cor base.
+  const texPintura = tex('pintura', png(64, 64, (x, y) => {
+    const g = 242 + ruido(x, y, 2) * 13
+    return [g, g, g, 255].map(Math.round)
+  }))
+  const normPintura = tex('pintura_n', mapaNormal(128, 128, (x, y) => ruidoSuave(x / 2, y / 2, 4) * 0.7 + ruido(x, y, 9) * 0.3, 0.25))
+  // Pneu: borracha fosca com granulado.
+  const texPneu = tex('pneu', png(64, 64, (x, y) => {
+    const g = 28 + ruido(x, y, 3) * 18
+    return [g, g, g, 255].map(Math.round)
+  }))
+
+  const tinta = material('tinta', 0xffbe3c, 0.32, 0.65, { base: texPintura, normal: normPintura, normalEsc: 0.15, verniz: true })
+  const vidro = material('vidro', 0x0f1722, 0.04, 0.1)
+  const plastico = material('plastico', 0x14171c, 0.65, 0)
+  const aro = material('aro', 0xc9d1da, 0.28, 1)
+  const pneu = material('pneu', 0x1a1c20, 0.92, 0, { base: texPneu })
+  const farol = material('farol', 0xf4f7ff, 0.2, 0, { emissivoHex: 0xdfe8ff })
+  const lanterna = material('lanterna', 0xb3141a, 0.3, 0, { emissivoHex: 0xff2a2a })
+
+  const gTinta = novaGeo(), gVidro = novaGeo(), gPlast = novaGeo(), gAro = novaGeo(), gPneu = novaGeo(), gFarol = novaGeo(), gLant = novaGeo()
+  caixa(gTinta, [0, 0.55, 0], [4.4, 0.56, 1.9], { uvPorMetro: 0.4 }) // carroceria
+  caixa(gTinta, [1.45, 0.86, 0], [1.4, 0.06, 1.84], { uvPorMetro: 0.4 }) // capô
+  caixa(gTinta, [-1.65, 0.86, 0], [1.1, 0.06, 1.84], { uvPorMetro: 0.4 }) // porta-malas
+  prisma(gVidro, [[-1.25, 0], [0.8, 0], [0.2, 0.62], [-0.85, 0.62]], [0, 0.88, 0], 1.74) // cabine em vidro
+  caixa(gTinta, [-0.33, 1.53, 0], [1.2, 0.06, 1.76], { uvPorMetro: 0.4 }) // teto
+  for (const s of [-1, 1]) caixa(gTinta, [0.45, 1.0, s * 1.0], [0.14, 0.1, 0.2]) // retrovisores
+  caixa(gPlast, [2.24, 0.4, 0], [0.12, 0.3, 1.86]) // para-choque dianteiro
+  caixa(gPlast, [-2.24, 0.4, 0], [0.12, 0.3, 1.86]) // para-choque traseiro
+  caixa(gPlast, [2.21, 0.62, 0], [0.05, 0.16, 0.8]) // grade
+  for (const s of [-1, 1]) caixa(gFarol, [2.2, 0.66, s * 0.7], [0.06, 0.14, 0.4]) // faróis
+  for (const s of [-1, 1]) caixa(gLant, [-2.2, 0.68, s * 0.72], [0.06, 0.14, 0.42]) // lanternas
+  for (const x of [1.4, -1.4]) for (const z of [0.98, -0.98]) {
+    cilindro(gPneu, [x, 0.4, z], 0.4, 0.3)
+    cilindro(gAro, [x, 0.4, z * 1.02], 0.27, 0.32)
+  }
+
+  const raiz = doc.createNode('carro')
+  for (const [n, g, m] of [['carroceria', gTinta, tinta], ['vidro', gVidro, vidro], ['plasticos', gPlast, plastico], ['aros', gAro, aro], ['pneus', gPneu, pneu], ['farois', gFarol, farol], ['lanternas', gLant, lanterna]]) raiz.addChild(no(n, g, m))
+  await salvar('carro', raiz)
 }
 
-// ---- prédio: bloco com janelas em relevo para fachada texturizável ----
-{
-  const parede = novaGeo(), janela = novaGeo()
-  caixa(parede, [0, 3, 0], [3, 6, 3])
-  for (let andar = 0; andar < 4; andar++)
-    for (const x of [-0.8, 0.8]) {
-      caixa(janela, [x, 1.2 + andar * 1.3, 1.52], [0.9, 0.7, 0.05])
-      caixa(janela, [x, 1.2 + andar * 1.3, -1.52], [0.9, 0.7, 0.05])
+// =====================================================================================
+// PRÉDIO: fachada com baias, janelas com esquadria e vidro refletivo, térreo comercial,
+// janelas acesas (emissiva) e juntas em relevo (normal).
+// =====================================================================================
+function fachada(baias, andares, semente) {
+  const T = 64, L = baias * T, A = andares * T
+  const base = new Uint8Array(L * A * 3), alt = new Float32Array(L * A), emi = new Uint8Array(L * A * 3)
+  for (let y = 0; y < A; y++) for (let x = 0; x < L; x++) {
+    const bx = Math.floor(x / T), by = Math.floor(y / T), u = x % T, v = y % T
+    const terreo = by === andares - 1
+    const i = y * L + x
+    // concreto com manchas e escorrimentos
+    const g = 168 + ruidoSuave(x / 6, y / 6, semente) * 34 + ruido(x, y, semente + 1) * 12 + ruidoSuave(x / 2, y / 40, semente + 2) * 18 * (v / T)
+    let c = [g, g * 0.985, g * 0.96]
+    let h = 0.5
+    let e = [0, 0, 0]
+    const acesa = ruido(bx, by, semente + 7) < (terreo ? 0.75 : 0.34)
+    const vidroX = terreo ? u >= 4 && u <= 59 && v >= 16 && v <= 60 : u >= 10 && u <= 53 && v >= 10 && v <= 49
+    const moldura = terreo ? u >= 2 && u <= 61 && v >= 14 && v <= 62 : u >= 7 && u <= 56 && v >= 7 && v <= 53
+    if (v >= 58 && !terreo) { c = c.map((k) => k * 0.72); h = 0.62 } // laje
+    if (terreo && v < 14) { c = [58, 64, 74]; h = 0.58 } // marquise
+    if (moldura) { c = [46, 50, 56]; h = 0.64 }
+    if (vidroX) {
+      const refl = 1 - v / T
+      const faixa = Math.abs(((u + v * 1.4) % 34) - 17) < 3 ? 26 : 0 // reflexo diagonal
+      c = [48 + refl * 46 + faixa, 66 + refl * 58 + faixa, 88 + refl * 70 + faixa]
+      h = 0.2
+      if (!terreo && Math.abs(u - 31) < 1.2) { c = [42, 46, 52]; h = 0.6 } // montante central
+      if (acesa) {
+        c = [c[0] * 0.5 + 70, c[1] * 0.5 + 56, c[2] * 0.5 + 30]
+        const brilho = 0.7 + ruido(bx, by, semente + 3) * 0.3
+        e = [255 * brilho, 196 * brilho, 120 * brilho]
+      }
     }
-  const no = doc.createNode('predio')
-    .addChild(doc.createNode('parede').setMesh(malha('parede', parede, material('concreto', 0x3a4558, 0.85, 0, texConcreto))))
-    .addChild(doc.createNode('janelas').setMesh(malha('janelas', janela, material('janela', 0x4cc9f0, 0.2, 0.1, texJanela))))
-  await salvar('predio', no)
+    if (terreo && vidroX && bx === 1 && u >= 24 && u <= 40) { c = [30, 34, 40]; h = 0.35 } // porta
+    base[i * 3] = c[0]; base[i * 3 + 1] = c[1]; base[i * 3 + 2] = c[2]
+    alt[i] = h
+    emi[i * 3] = e[0]; emi[i * 3 + 1] = e[1]; emi[i * 3 + 2] = e[2]
+  }
+  const pix = (arr) => (x, y) => {
+    const i = (y * L + x) * 3
+    return [q(arr[i] / 255, 40) * 255, q(arr[i + 1] / 255, 40) * 255, q(arr[i + 2] / 255, 40) * 255, 255]
+  }
+  return {
+    base: tex(`fachada_${semente}`, png(L, A, pix(base))),
+    normal: tex(`fachada_n_${semente}`, mapaNormal(L, A, (x, y) => alt[y * L + x], 5)),
+    emissiva: tex(`fachada_e_${semente}`, png(L, A, pix(emi))),
+  }
+}
+
+{
+  const ANDARES = 8
+  const frente = fachada(4, ANDARES, 3)
+  const lado = fachada(3, ANDARES, 11)
+  const concretoH = (x, y) => ruidoSuave(x / 5, y / 5, 21) * 0.6 + ruido(x, y, 22) * 0.4
+  const texTelhado = tex('telhado', png(128, 128, (x, y) => {
+    const g = q((120 + concretoH(x, y) * 60) / 255, 40) * 255
+    return [g, g, g * 0.98, 255].map(Math.round)
+  }))
+  const normTelhado = tex('telhado_n', mapaNormal(128, 128, concretoH, 1.5))
+
+  const mFrente = material('fachada_frente', 0xffffff, 0.55, 0, { base: frente.base, normal: frente.normal, emissiva: frente.emissiva })
+  const mLado = material('fachada_lado', 0xffffff, 0.55, 0, { base: lado.base, normal: lado.normal, emissiva: lado.emissiva })
+  const mTelhado = material('telhado', 0xffffff, 0.9, 0, { base: texTelhado, normal: normTelhado })
+  const mMetal = material('metal', 0x8a939e, 0.4, 0.85)
+
+  const W = 4.8, H = 9.6, D = 3.6
+  const centro = [0, H / 2, 0]
+  const gFrente = novaGeo(), gLado = novaGeo(), gTop = novaGeo(), gMetal = novaGeo()
+  const uvF = [[0, 1], [1, 1], [1, 0], [0, 0]]
+  const x = W / 2, y = H / 2, z = D / 2
+  const P = (sx, sy, sz) => [sx * x, H / 2 + sy * y, sz * z]
+  face(gFrente, [P(-1, -1, 1), P(1, -1, 1), P(1, 1, 1), P(-1, 1, 1)], uvF, centro)
+  face(gFrente, [P(1, -1, -1), P(-1, -1, -1), P(-1, 1, -1), P(1, 1, -1)], uvF, centro)
+  face(gLado, [P(1, -1, 1), P(1, -1, -1), P(1, 1, -1), P(1, 1, 1)], uvF, centro)
+  face(gLado, [P(-1, -1, -1), P(-1, -1, 1), P(-1, 1, 1), P(-1, 1, -1)], uvF, centro)
+  caixa(gTop, [0, H + 0.12, 0], [W + 0.2, 0.24, D + 0.2], { uvPorMetro: 0.5 }) // laje de cobertura
+  caixa(gTop, [-1.4, H + 0.6, 0.6], [1.2, 0.72, 1.0], { uvPorMetro: 0.5 }) // casa de máquinas
+  caixa(gMetal, [1.2, H + 0.5, -0.7], [0.9, 0.5, 0.7]) // condensador
+  caixa(gMetal, [0.2, H + 0.42, 0.9], [0.5, 0.34, 0.5]) // exaustor
+
+  const raiz = doc.createNode('predio')
+  raiz.addChild(no('frente', gFrente, mFrente)).addChild(no('lados', gLado, mLado)).addChild(no('cobertura', gTop, mTelhado)).addChild(no('equipamentos', gMetal, mMetal))
+  await salvar('predio', raiz)
 }
 
 console.log('modelos gerados em public/models')

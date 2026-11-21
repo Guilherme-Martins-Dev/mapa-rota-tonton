@@ -46,6 +46,7 @@ export default function Home() {
           opacity: 0,
           y: 40,
           stagger: 0.08,
+          ease: 'power3.out',
           scrollTrigger: { trigger: el, start: 'top 70%', end: 'top 30%', scrub: true },
         })
       })
