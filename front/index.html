@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -124,9 +124,31 @@
         ]
       }
     </script>
+    <script>
+      // Tema antes da primeira pintura (sem piscar): a escolha salva; senão, a do sistema.
+      (function () {
+        try {
+          var t = localStorage.getItem('tonton.tema');
+          if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.dataset.theme = t;
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', t === 'light' ? '#f6f4ef' : '#0a0e14');
+          var i = localStorage.getItem('tonton.idioma');
+          if (i === 'en') document.documentElement.lang = 'en';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main>
+        <h1>Rotas de Messejana</h1>
+        <p>Demonstração de rotas em Messejana, Fortaleza: um grafo do OpenStreetMap, Dijkstra, A* e Yen escolhem o caminho por distância, tempo ou consumo de combustível. Este site precisa de JavaScript para o mapa e a cena 3D.</p>
+        <p>Projeto desenvolvido por completo por Guilherme Martins Bezerra (Engenharia da Computação). Colaboradores na validação dos dados: Erick Morais e Silva, Kauan Magalhães Costa e Luiz Henrique (Engenharia da Computação). Professor responsável: Sandro Costa Mesquita, coordenador do curso de tecnologia no Centro Universitário Ateneu, coordenador da Pós-graduação em Inteligência Artificial da UniAteneu, presidente do ITIA e doutorando na Fiocruz. Disciplina Algoritmos em Grafos, Centro Universitário Ateneu (UniAteneu), unidade Lagoa.</p>
+        <p lang="en">Messejana Routes: route demo for Messejana, Fortaleza, Brazil, built with an OpenStreetMap graph, Dijkstra, A* and Yen. Developed entirely by Guilherme Martins Bezerra; data-validation collaborators Erick Morais e Silva, Kauan Magalhães Costa and Luiz Henrique; professor in charge Sandro Costa Mesquita. Graph Algorithms course, Computer Engineering, Centro Universitário Ateneu (UniAteneu), Lagoa campus.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

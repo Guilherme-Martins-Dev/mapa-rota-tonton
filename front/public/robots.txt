@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://mapa-rota-tonton.vercel.app/sitemap.xml

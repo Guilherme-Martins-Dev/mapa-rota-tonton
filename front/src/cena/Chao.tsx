@@ -1,7 +1,8 @@
 import { useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Color, ShaderMaterial } from 'three'
 import { corToken } from '../cores'
+import { useTema } from '../theme/tema'
 import { progresso } from './progresso'
 
 const VERT = /* glsl */ `
@@ -31,11 +32,15 @@ void main() {
 
 /** Chão com shader: o grafo viário abstrato sob o carro. */
 export function Chao() {
+  const tema = useTema()
   const mat = useRef<ShaderMaterial>(null)
   const uniforms = useMemo(
     () => ({ uTempo: { value: 0 }, uProgresso: { value: 0 }, uCor: { value: new Color(corToken('c-distancia')) } }),
     [],
   )
+  useEffect(() => {
+    uniforms.uCor.value.set(corToken('c-distancia'))
+  }, [tema, uniforms])
   useFrame((_, dt) => {
     if (!mat.current) return
     mat.current.uniforms.uTempo.value += dt

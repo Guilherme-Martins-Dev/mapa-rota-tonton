@@ -8,6 +8,7 @@ const RAIO_RODA = 0.311
 const RODAS = ['tras_a', 'tras_b', 'frente_a', 'frente_b'] as const
 interface Roda { roda: Object3D; direcao: Object3D; frente: boolean }
 import { corToken } from '../cores'
+import { useTema } from '../theme/tema'
 import type { RotaFeature } from '../data/tipos'
 import { Caminho, criarCaminho, distribuirPredios, type Predio, type TipoPredio } from './caminho'
 import { CARRO_GLB } from './modelos'
@@ -54,9 +55,11 @@ function Via({ rua }: { rua: Caminho }) {
       tracos,
     }
   }, [rua])
+  const tema = useTema()
   const cor = useMemo(
     () => ({ asfalto: corToken('superficie'), calcada: corToken('superficie-2'), faixa: corToken('c-tempo') }),
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- relê os tokens quando o tema muda
+    [tema],
   )
   return (
     <group>
@@ -202,7 +205,9 @@ function Pausa() {
 export function CenaViagem({ rota }: { rota: RotaFeature | undefined }) {
   const rua = useMemo(() => (rota ? criarCaminho(rota.geometry.coordinates) : null), [rota])
   const predios = useMemo(() => (rua ? distribuirPredios(rua) : []), [rua])
-  const fundo = useMemo(() => corToken('fundo'), [])
+  const tema = useTema()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- relê o token quando o tema muda
+  const fundo = useMemo(() => corToken('fundo'), [tema])
   if (!rua) return null
   return (
     <Canvas dpr={[1, 1.5]} camera={{ fov: 52, near: 0.1, far: 240, position: posicaoInicial(rua) }}>

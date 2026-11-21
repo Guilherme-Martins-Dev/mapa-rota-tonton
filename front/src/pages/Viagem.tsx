@@ -6,15 +6,16 @@ import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { INTRO_VIAGEM, MERGULHO, viagem } from '../cena/progresso'
 import { CAPITULOS, type Capitulo } from '../conteudo/capitulos'
+import { useConteudo } from '../i18n/conteudo'
+import { useFmt, useT } from '../i18n/useIdioma'
 import { rotaDoCriterio, type Rotas } from '../data/tipos'
-import { CRITERIOS, Metrica } from '../ui'
+import { Metrica, useCriterios } from '../ui'
 import { Tx } from '../ui/Tx'
 
 const CenaViagem = lazy(() => import('../cena/CenaViagem').then((m) => ({ default: m.CenaViagem })))
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
-const fmt = (n: number, casas: number) => n.toFixed(casas).replace('.', ',')
 const N = CAPITULOS.length
 /** Rolagem total da viagem, em alturas de tela: ~2 telas por capítulo, uma pergunta a cada ~0,7 tela. */
 const ALTURAS = 1700
@@ -32,11 +33,12 @@ const fracaoDe = (p: number) => {
 
 /** Perguntas do professor: no scroll aparece uma por vez, conforme a posição dentro do capítulo; sem scroll (lista) aparecem todas. */
 function Pergunta({ c, fracao, todas }: { c: Capitulo; fracao: number; todas?: boolean }) {
+  const t = useT()
   const total = c.perguntas.length
   const i = Math.min(total - 1, Math.floor(fracao * total))
   const lista = todas ? c.perguntas : [c.perguntas[i]]
   return (
-    <div className="pergunta" role="group" aria-label="Perguntas do professor">
+    <div className="pergunta" role="group" aria-label={t('perguntasProfessor')}>
       {lista.map((q) => (
         <div key={q.p} className="pergunta__item">
           <h4 className="pergunta__p"><Tx>{q.p}</Tx></h4>
@@ -46,7 +48,7 @@ function Pergunta({ c, fracao, todas }: { c: Capitulo; fracao: number; todas?: b
       {!todas && total > 1 && (
         <p className="pergunta__passo" aria-hidden="true">
           {c.perguntas.map((q, k) => <span key={q.p} className={k === i ? 'pergunta__ponto pergunta__ponto--ativo' : 'pergunta__ponto'} />)}
-          <span className="pergunta__contagem">{i + 1} de {total}</span>
+          <span className="pergunta__contagem">{t('passo')(i + 1, total)}</span>
         </p>
       )}
     </div>
@@ -54,13 +56,16 @@ function Pergunta({ c, fracao, todas }: { c: Capitulo; fracao: number; todas?: b
 }
 
 function Painel({ c, rotas, leitura, fracao = 0, todas }: { c: Capitulo; rotas: Rotas | null; leitura?: string; fracao?: number; todas?: boolean }) {
+  const t = useT()
+  const fmt = useFmt()
+  const criterios = useCriterios()
   return (
-    <article className="capitulo">
+    <article className="capitulo" data-capitulo={c.id}>
       <h3>{c.titulo}</h3>
       <p><Tx>{c.texto}</Tx></p>
       {c.metricas && (
         <div className="capitulo__metricas">
-          {CRITERIOS.map((k) => {
+          {criterios.map((k) => {
             const r = rotaDoCriterio(rotas, k.id)
             return r ? (
               <Metrica
@@ -77,8 +82,8 @@ function Painel({ c, rotas, leitura, fracao = 0, todas }: { c: Capitulo; rotas: 
       <Pergunta c={c} fracao={fracao} todas={todas} />
       {c.acoes && (
         <div className="acoes">
-          <Link to="/mapa" className="botao">Explorar o mapa</Link>
-          <Link to="/construcao" className="link">Como foi construído</Link>
+          <Link to="/mapa" className="botao">{t('explorarMapa')}</Link>
+          <Link to="/construcao" className="link">{t('comoConstruido')}</Link>
         </div>
       )}
       {leitura && <p className="capitulo__leitura">{leitura}</p>}
@@ -110,6 +115,9 @@ function mergulhar(prog: number) {
 }
 
 export function Viagem({ rotas }: { rotas: Rotas | null }) {
+  const t = useT()
+  const fmt = useFmt()
+  const { capitulos } = useConteudo()
   const raiz = useRef<HTMLElement>(null)
   const gatilho = useRef<ScrollTrigger | null>(null)
   const [pct, setPct] = useState(0) // % da viagem, em passos de 1: o painel só re-renderiza quando muda
@@ -145,12 +153,12 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
   }
 
   const leitura = rota
-    ? `${fmt((pct / 100) * rota.properties.distancia_km, 2)} de ${fmt(rota.properties.distancia_km, 2)} km`
+    ? t('leituraKm')(fmt((pct / 100) * rota.properties.distancia_km, 2), fmt(rota.properties.distancia_km, 2))
     : undefined
 
   return (
     <section id="viagem" ref={raiz} className={reduz ? 'viagem viagem--lista' : pct < MERGULHO * 100 + 1 ? 'viagem viagem--mergulho viagem--espera' : pct < INTRO_VIAGEM * 100 ? 'viagem viagem--espera' : 'viagem'} aria-labelledby="viagem-titulo">
-      <h2 id="viagem-titulo" className="sr-only">A viagem pelo projeto, em {N} capítulos</h2>
+      <h2 id="viagem-titulo" className="sr-only">{t('viagemTitulo')(N)}</h2>
       <div className="viagem__cena" aria-hidden="true">
         <Suspense fallback={null}>
           <CenaViagem rota={rota} />
@@ -158,18 +166,18 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
       </div>
       {reduz ? (
         <div className="viagem__lista">
-          {CAPITULOS.map((c) => (
+          {capitulos.map((c) => (
             <Painel key={c.id} c={c} rotas={rotas} todas />
           ))}
         </div>
       ) : (
         <>
           <div className="viagem__painel" aria-live="polite">
-            <Painel key={CAPITULOS[idx].id} c={CAPITULOS[idx]} rotas={rotas} leitura={leitura} fracao={fracaoDe(pct / 100)} />
+            <Painel key={capitulos[idx].id} c={capitulos[idx]} rotas={rotas} leitura={leitura} fracao={fracaoDe(pct / 100)} />
           </div>
-          <nav className="viagem__capitulos" aria-label="Capítulos da viagem">
+          <nav className="viagem__capitulos" aria-label={t('capitulosNav')}>
             <ol>
-              {CAPITULOS.map((c, i) => (
+              {capitulos.map((c, i) => (
                 <li key={c.id}>
                   <button type="button" aria-label={`${i + 1}. ${c.rotulo}`} aria-current={i === idx ? 'step' : undefined} onClick={() => irPara(i)}>
                     <span className="viagem__num">{i + 1}</span>
@@ -182,8 +190,9 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
         </>
       )}
       <p className="viagem__creditos">
-        Ruas: OpenStreetMap (ODbL). Mapa: CARTO. Veículos: Car3DB (MIT). Carro "Toyota Corola" de danieljorge435, CC BY 4.0, via MeshFleet.
-        Trânsito simulado. <Link to="/construcao" className="link">Fontes e licenças</Link>
+        <span className="viagem__creditos-longo">{t('viagemCreditos')}</span>
+        <span className="viagem__creditos-curto">{t('viagemCreditosCurto')}</span>{' '}
+        <Link to="/construcao" className="link">{t('fontesLicencas')}</Link>
       </p>
     </section>
   )
