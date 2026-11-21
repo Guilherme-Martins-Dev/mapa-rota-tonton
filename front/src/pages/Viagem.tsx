@@ -34,7 +34,7 @@ function Pergunta({ c }: { c: Capitulo }) {
       <p className="pergunta__r">{q.r}</p>
       {total > 1 && (
         <button type="button" className="pergunta__proxima" onClick={() => setI((i + 1) % total)}>
-          Outra pergunta ({i + 1}/{total})
+          Ver a pergunta {(i + 1) % total + 1} de {total}
         </button>
       )}
     </div>

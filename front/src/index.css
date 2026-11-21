@@ -41,9 +41,9 @@ a.botao { display: inline-block; text-decoration: none; }
 .pergunta { display: grid; gap: var(--e2); margin-top: var(--e1); }
 .capitulo .pergunta__p { margin: 0; font-size: var(--t0); font-weight: 600; line-height: 1.35; color: var(--texto); text-wrap: balance; }
 .capitulo .pergunta__r { margin: 0; font-size: var(--t-1); line-height: 1.6; }
-.pergunta__proxima { justify-self: start; min-height: var(--alvo-toque); padding: 0; border: 0; background: none; color: var(--acento); font: inherit; font-size: var(--t-1); cursor: pointer; transition: color var(--dur) var(--ease); }
+.pergunta__proxima { justify-self: start; min-height: var(--alvo-toque); padding: 0 var(--e3); border: 0; border-radius: var(--p-raio-pilula); background: var(--botao-pilula-bg); color: var(--texto); font: inherit; font-size: var(--t-1); cursor: pointer; transition: background var(--dur) var(--ease); }
 .pergunta__proxima:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
-@media (hover: hover) and (pointer: fine) { .pergunta__proxima:hover { color: var(--texto); } }
+@media (hover: hover) and (pointer: fine) { .pergunta__proxima:hover { background: var(--botao-pilula-ativo-bg); color: var(--botao-pilula-ativo-texto); } }
 .capitulo .capitulo__leitura { color: var(--c-tempo); font-weight: 600; font-variant-numeric: tabular-nums; }
 .viagem__capitulos { position: absolute; right: clamp(12px, 3vw, 40px); top: 50%; transform: translateY(-50%); }
 .viagem__capitulos ol { display: grid; gap: var(--e1); margin: 0; padding: 0; list-style: none; }

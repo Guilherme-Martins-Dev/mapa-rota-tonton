@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { BufferGeometry, Float32BufferAttribute, MathUtils, type Group, type Object3D, type PointLight } from 'three'
 
 /** Raio da roda do Corolla na cena (2,92 do modelo x 0,1064 da escala de conversão). */
-const RAIO_RODA = 0.358
+const RAIO_RODA = 0.311
 const RODAS = ['tras_a', 'tras_b', 'frente_a', 'frente_b'] as const
 interface Roda { roda: Object3D; direcao: Object3D; frente: boolean }
 import { corToken } from '../cores'
