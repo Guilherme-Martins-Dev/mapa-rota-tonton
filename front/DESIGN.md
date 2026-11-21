@@ -20,7 +20,7 @@ Cartografia técnica noturna: a cidade é um grafo luminoso sobre fundo escuro. 
 
 Regra de papel: as três cores de critério **não** servem de decoração nem de botão; o acento de interface é o `--texto` em contorno.
 
-Tipografia: títulos e corpo em **Inter Tight** (600/400); números, coordenadas e métricas em **JetBrains Mono**. Escala 1.25 (`0.8 / 1 / 1.25 / 1.563 / 1.953 / 2.441 rem`). `text-wrap: balance` nos títulos.
+Tipografia: títulos e corpo em **Instrument Sans** (600/400), uma só família; números com `tabular-nums`, sem monoespaçada. Escala 1.25 (`0.8 / 1 / 1.25 / 1.563 / 1.953 / 2.441 rem`). `text-wrap: balance` nos títulos.
 Espaço: base 4 px; seções com `min-height: 100vh`. Forma: raio 12 px nos cartões, 2 px nos chips de dados. Elevação: sem sombra, só borda + desfoque de fundo.
 Movimento: ease `cubic-bezier(.22,1,.36,1)`, 240–600 ms; rolagem controla a progressão (scrub); `prefers-reduced-motion` desliga.
 
