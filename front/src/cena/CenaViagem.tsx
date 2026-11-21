@@ -2,6 +2,11 @@ import { Clone, ContactShadows, Environment, Lightformer, useGLTF } from '@react
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useMemo, useRef, useState } from 'react'
 import { BufferGeometry, Float32BufferAttribute, MathUtils, type Group, type Object3D, type PointLight } from 'three'
+
+/** Raio da roda do Corolla na cena (2,92 do modelo x 0,1064 da escala de conversão). */
+const RAIO_RODA = 0.311
+const RODAS = ['tras_a', 'tras_b', 'frente_a', 'frente_b'] as const
+interface Roda { roda: Object3D; direcao: Object3D; frente: boolean }
 import { corToken } from '../cores'
 import type { RotaFeature } from '../data/tipos'
 import { Caminho, criarCaminho, distribuirPredios, type Predio, type TipoPredio } from './caminho'
@@ -100,6 +105,8 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
   const corpo = useRef<Group>(null)
   const luz = useRef<PointLight>(null)
   const sRef = useRef(0)
+  const sAnt = useRef(0)
+  const rodas = useRef<Roda[]>([])
   const rumo = useRef<number | null>(null)
   const inicio = useMemo(() => rua.em(0), [rua])
 
@@ -110,6 +117,8 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     const descida = MathUtils.smoothstep(prog, MERGULHO, INTRO_VIAGEM) // 0 = vista aérea da largada, 1 = câmera de perseguição
     sRef.current = damp(sRef.current, alvo, 3.5, delta)
     const s = sRef.current
+    const ds = s - sAnt.current
+    sAnt.current = s
     const c = rua.em(s)
     // Rumo pela corda de ±2 unidades (não pela tangente pontual): curvas fechadas viram giros, não trancos.
     const a = rua.em(s - 2), b = rua.em(s + 2)
@@ -122,6 +131,18 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     if (g) {
       g.position.set(c.x, 0, c.z)
       g.rotation.y = novo
+    }
+    // Rodas: rolam pela distância percorrida (ds / raio) e as dianteiras esterçam conforme o carro gira.
+    if (rodas.current.length < 4 && grupo.current) {
+      rodas.current = RODAS.flatMap((n) => {
+        const roda = grupo.current?.getObjectByName(`roda_${n}`), direcao = grupo.current?.getObjectByName(`direcao_${n}`)
+        return roda && direcao ? [{ roda, direcao, frente: n.startsWith('frente') }] : []
+      })
+    }
+    const esterco = MathUtils.clamp((dif / Math.max(delta, 1e-3)) * 0.06, -0.45, 0.45)
+    for (const r of rodas.current) {
+      r.roda.rotation.x += ds / RAIO_RODA
+      r.direcao.rotation.y = damp(r.direcao.rotation.y, r.frente ? esterco : 0, 10, delta)
     }
     // Inclina na curva: quanto mais rápido o rumo muda, mais a carroceria rola para o lado de fora.
     if (corpo.current) corpo.current.rotation.x = damp(corpo.current.rotation.x, MathUtils.clamp((dif / Math.max(delta, 1e-3)) * 0.012, -0.07, 0.07), 6, delta)
