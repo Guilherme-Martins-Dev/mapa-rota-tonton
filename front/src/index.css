@@ -149,7 +149,9 @@ html.tema-fade, html.tema-fade *, html.tema-fade *::before, html.tema-fade *::af
   body .barra__botao { min-width: 34px; height: 34px; padding-inline: 6px; font-size: 0.8125rem; }
   body .botao { padding: var(--e3); font-size: var(--t-1); }
   /* viagem: painel mais baixo e sem rolagem interna; leitura em km vira um selo no topo */
-  body .viagem__painel { bottom: 76px; max-height: 50svh; padding: var(--e3); }
+  body .viagem__painel { bottom: 76px; max-height: 52svh; padding: var(--e3); }
+  /* créditos: o texto é o mais longo da viagem, então a folha pode subir mais */
+  body .viagem__painel:has([data-capitulo='creditos']) { max-height: 66svh; }
   body .capitulo { gap: var(--e2); }
   body .capitulo .capitulo__leitura { order: -1; font-size: 0.75rem; }
   body .capitulo .pergunta__p { font-size: 0.9375rem; }

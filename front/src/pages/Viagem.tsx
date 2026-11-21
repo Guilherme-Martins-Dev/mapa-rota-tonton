@@ -60,7 +60,7 @@ function Painel({ c, rotas, leitura, fracao = 0, todas }: { c: Capitulo; rotas: 
   const fmt = useFmt()
   const criterios = useCriterios()
   return (
-    <article className="capitulo">
+    <article className="capitulo" data-capitulo={c.id}>
       <h3>{c.titulo}</h3>
       <p><Tx>{c.texto}</Tx></p>
       {c.metricas && (
