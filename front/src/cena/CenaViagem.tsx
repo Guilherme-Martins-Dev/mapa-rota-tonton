@@ -10,8 +10,8 @@ import { INTRO_VIAGEM, MERGULHO, viagem } from './progresso'
 
 const MEIA_PISTA = 2.2
 const CALCADA = 3.6
-const ALTURA_CAMERA = 2.3
-const ATRAS_CAMERA = 5.4
+const ALTURA_CAMERA = 2.1
+const ATRAS_CAMERA = 5.6
 const MAX_CAMERA = 16
 const ALTURA_AEREA = 36
 
@@ -132,9 +132,9 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     const k = 1 - Math.exp(-6 * delta)
     const atras = ATRAS_CAMERA * recuo * descida + 3 * (1 - descida)
     const alto = ALTURA_CAMERA * (0.6 + 0.4 * recuo) * descida + ALTURA_AEREA * (1 - descida)
-    cam.position.x += (c.x - tx * atras - tz * 1.1 * descida - cam.position.x) * k
+    cam.position.x += (c.x - tx * atras - tz * 2.3 * descida - cam.position.x) * k
     cam.position.y += (alto - cam.position.y) * k
-    cam.position.z += (c.z - tz * atras + tx * 1.1 * descida - cam.position.z) * k
+    cam.position.z += (c.z - tz * atras + tx * 2.3 * descida - cam.position.z) * k
     // Salto de scroll (barra arrastada, âncora): a câmera não fica mais longe do que MAX_CAMERA do carro.
     const dx = cam.position.x - c.x, dz = cam.position.z - c.z, dist = Math.hypot(dx, dz)
     if (dist > MAX_CAMERA) {
@@ -149,9 +149,9 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     <>
       <group ref={grupo} position={[inicio.x, 0, inicio.z]}>
         <group ref={corpo}>
-          <Clone object={carro} scale={0.7} />
+          <Clone object={carro} scale={1} />
         </group>
-        <ContactShadows position={[0, 0.02, 0]} opacity={0.6} scale={6} blur={2.2} far={1.5} resolution={256} />
+        <ContactShadows position={[0, 0.02, 0]} opacity={0.6} scale={8} blur={2.2} far={1.5} resolution={256} />
       </group>
       <pointLight ref={luz} intensity={70} distance={34} decay={2} />
       <Vizinhos predios={predios} sRef={sRef} modelos={modelos} />

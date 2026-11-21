@@ -20,3 +20,9 @@ __pycache__/
 # front
 front/node_modules/
 front/dist/
+
+# dataset 3DRealCar (grande; só o .glb convertido vai para public/models)
+front/fontes-3d/*
+!front/fontes-3d/*/
+front/fontes-3d/3drealcar/*
+!front/fontes-3d/3drealcar/LEIA-ME.md

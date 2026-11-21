@@ -81,6 +81,61 @@ function cilindro(g, [cx, cy, cz], raio, largura, lados = 20) {
   }
 }
 
+
+/**
+ * Superfície loftada ao longo de X: cada seção {x, w, y0, y1} é um retângulo de cantos arredondados no plano (z, y).
+ * Normais suaves (soma das normais das faces vizinhas); as pontas são fechadas com leque. Dá carroceria curva em vez de caixa.
+ */
+function loft(g, secoes, { raio = 0.28, lados = 5 } = {}) {
+  const anel = ({ x, w, y0, y1 }) => {
+    const rr = Math.min(raio, w / 2 - 1e-3, (y1 - y0) / 2 - 1e-3)
+    const cantos = [[w / 2 - rr, y1 - rr, 0], [-(w / 2 - rr), y1 - rr, 90], [-(w / 2 - rr), y0 + rr, 180], [w / 2 - rr, y0 + rr, 270]]
+    const pts = []
+    for (const [cz, cy, a0] of cantos) for (let i = 0; i <= lados; i++) {
+      const a = ((a0 + (90 * i) / lados) * Math.PI) / 180
+      pts.push([x, cy + Math.sin(a) * rr, cz + Math.cos(a) * rr])
+    }
+    return pts
+  }
+  const aneis = secoes.map(anel)
+  const n = aneis[0].length
+  const base = g.pos.length / 3
+  const nor = []
+  aneis.forEach((a, si) => a.forEach((p, i) => {
+    g.pos.push(...p)
+    g.uv.push((si / (aneis.length - 1)) * 1.5, i / n)
+    nor.push([0, 0, 0])
+  }))
+  const idx = []
+  const centroX = (si) => [aneis[si][0][0], (secoes[si].y0 + secoes[si].y1) / 2, 0]
+  for (let si = 0; si < aneis.length - 1; si++) for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n
+    const a = si * n + i, b = si * n + j, c = (si + 1) * n + j, d = (si + 1) * n + i
+    let tri = [[a, b, c], [a, c, d]]
+    const P = (k) => g.pos.slice((base + k) * 3, (base + k) * 3 + 3)
+    const nf = norm(cruz(sub(P(b), P(a)), sub(P(c), P(a))))
+    const m = [(P(a)[0] + P(c)[0]) / 2, (P(a)[1] + P(c)[1]) / 2, (P(a)[2] + P(c)[2]) / 2]
+    if (dot(nf, sub(m, centroX(si))) < 0) tri = tri.map((t) => [t[0], t[2], t[1]])
+    for (const t of tri) {
+      const f = norm(cruz(sub(P(t[1]), P(t[0])), sub(P(t[2]), P(t[0]))))
+      for (const k of t) nor[k] = [nor[k][0] + f[0], nor[k][1] + f[1], nor[k][2] + f[2]]
+      idx.push(...t.map((k) => base + k))
+    }
+  }
+  nor.forEach((v) => g.nor.push(...norm(v)))
+  g.idx.push(...idx)
+  // tampas
+  for (const [si, sx] of [[0, -1], [aneis.length - 1, 1]]) {
+    const c0 = g.pos.length / 3
+    const cy = (secoes[si].y0 + secoes[si].y1) / 2
+    g.pos.push(secoes[si].x, cy, 0)
+    g.nor.push(sx, 0, 0)
+    g.uv.push(0.5, 0.5)
+    aneis[si].forEach((p) => { g.pos.push(...p); g.nor.push(sx, 0, 0); g.uv.push(0.5, 0.5) })
+    for (let i = 0; i < n; i++) g.idx.push(...(sx > 0 ? [c0, c0 + 1 + i, c0 + 1 + ((i + 1) % n)] : [c0, c0 + 1 + ((i + 1) % n), c0 + 1 + i]))
+  }
+}
+
 // ---------- materiais ----------
 const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
 const rgba = (hex) => [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255].map(lin).concat(1)
@@ -152,20 +207,37 @@ mkdirSync('public/models', { recursive: true })
   const lanterna = material('lanterna', 0xb3141a, 0.3, 0, { emissivoHex: 0xff2a2a })
 
   const gTinta = novaGeo(), gVidro = novaGeo(), gPlast = novaGeo(), gAro = novaGeo(), gPneu = novaGeo(), gFarol = novaGeo(), gLant = novaGeo()
-  caixa(gTinta, [0, 0.55, 0], [4.4, 0.56, 1.9], { uvPorMetro: 0.4 }) // carroceria
-  caixa(gTinta, [1.45, 0.86, 0], [1.4, 0.06, 1.84], { uvPorMetro: 0.4 }) // capô
-  caixa(gTinta, [-1.65, 0.86, 0], [1.1, 0.06, 1.84], { uvPorMetro: 0.4 }) // porta-malas
-  prisma(gVidro, [[-1.25, 0], [0.8, 0], [0.2, 0.62], [-0.85, 0.62]], [0, 0.88, 0], 1.74) // cabine em vidro
-  caixa(gTinta, [-0.33, 1.53, 0], [1.2, 0.06, 1.76], { uvPorMetro: 0.4 }) // teto
-  for (const s of [-1, 1]) caixa(gTinta, [0.45, 1.0, s * 1.0], [0.14, 0.1, 0.2]) // retrovisores
-  caixa(gPlast, [2.24, 0.4, 0], [0.12, 0.3, 1.86]) // para-choque dianteiro
-  caixa(gPlast, [-2.24, 0.4, 0], [0.12, 0.3, 1.86]) // para-choque traseiro
-  caixa(gPlast, [2.21, 0.62, 0], [0.05, 0.16, 0.8]) // grade
-  for (const s of [-1, 1]) caixa(gFarol, [2.2, 0.66, s * 0.7], [0.06, 0.14, 0.4]) // faróis
-  for (const s of [-1, 1]) caixa(gLant, [-2.2, 0.68, s * 0.72], [0.06, 0.14, 0.42]) // lanternas
-  for (const x of [1.4, -1.4]) for (const z of [0.98, -0.98]) {
+  // Carroceria: seções ao longo do carro (largura, base, topo). Capô e porta-malas caem para as pontas.
+  loft(gTinta, [
+    { x: -2.2, w: 1.5, y0: 0.34, y1: 0.7 },
+    { x: -1.95, w: 1.72, y0: 0.3, y1: 0.86 },
+    { x: -1.2, w: 1.8, y0: 0.28, y1: 0.9 },
+    { x: 0.2, w: 1.8, y0: 0.28, y1: 0.9 },
+    { x: 1.2, w: 1.8, y0: 0.28, y1: 0.86 },
+    { x: 1.95, w: 1.7, y0: 0.3, y1: 0.7 },
+    { x: 2.2, w: 1.5, y0: 0.34, y1: 0.56 },
+  ], { raio: 0.3 })
+  // Cabine: afunila para o teto (colunas inclinadas) e vira vidro; o teto é um painel de pintura por cima.
+  loft(gVidro, [
+    { x: -1.3, w: 1.62, y0: 0.84, y1: 0.98 },
+    { x: -0.85, w: 1.5, y0: 0.84, y1: 1.4 },
+    { x: 0.1, w: 1.5, y0: 0.84, y1: 1.42 },
+    { x: 0.7, w: 1.56, y0: 0.84, y1: 1.02 },
+  ], { raio: 0.2 })
+  loft(gTinta, [
+    { x: -0.95, w: 1.44, y0: 1.38, y1: 1.46 },
+    { x: -0.35, w: 1.5, y0: 1.38, y1: 1.47 },
+    { x: 0.15, w: 1.44, y0: 1.38, y1: 1.46 },
+  ], { raio: 0.04, lados: 2 })
+  for (const s of [-1, 1]) caixa(gTinta, [0.55, 0.98, s * 1.0], [0.14, 0.1, 0.2]) // retrovisores
+  caixa(gPlast, [2.16, 0.36, 0], [0.14, 0.2, 1.5]) // para-choque dianteiro
+  caixa(gPlast, [-2.16, 0.36, 0], [0.14, 0.2, 1.46]) // para-choque traseiro
+  caixa(gPlast, [2.19, 0.56, 0], [0.05, 0.14, 0.7]) // grade
+  for (const s of [-1, 1]) caixa(gFarol, [2.14, 0.6, s * 0.56], [0.12, 0.1, 0.34]) // faróis
+  for (const s of [-1, 1]) caixa(gLant, [-2.16, 0.68, s * 0.58], [0.1, 0.1, 0.38]) // lanternas
+  for (const x of [1.4, -1.4]) for (const z of [0.9, -0.9]) {
     cilindro(gPneu, [x, 0.4, z], 0.4, 0.3)
-    cilindro(gAro, [x, 0.4, z * 1.02], 0.27, 0.32)
+    cilindro(gAro, [x, 0.4, z * 1.03], 0.27, 0.32)
   }
 
   const raiz = doc.createNode('carro')
