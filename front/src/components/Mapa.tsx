@@ -44,7 +44,8 @@ export function Mapa({ rotas, criterio, interativo = false }: { rotas: Rotas | n
     const t0 = performance.now()
     const laco = (agora: number) => {
       setT(((agora - t0) / 3000) % 1.6)
-      setVista((v) => ({ ...v, bearing: progresso.valor * 40, pitch: 45 + progresso.valor * 10 }))
+      const bearing = Math.round(progresso.valor * 400) / 10 // só atualiza a câmera quando o scroll mexe (0,1°)
+      setVista((v) => (v.bearing === bearing ? v : { ...v, bearing, pitch: 45 + progresso.valor * 10 }))
       id = requestAnimationFrame(laco)
     }
     id = requestAnimationFrame(laco)

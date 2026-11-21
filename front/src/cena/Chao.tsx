@@ -23,7 +23,7 @@ void main() {
   float no = smoothstep(0.12, 0.0, length(fract(p) - 0.5) - 0.0) ;
   float d = distance(vUv, vec2(0.5));
   float pulso = smoothstep(0.06, 0.0, abs(d - fract(uTempo * 0.15 + uProgresso) * 0.7));
-  float borda = smoothstep(0.5, 0.15, d);
+  float borda = smoothstep(0.48, 0.1, d);
   float a = (linha * 0.35 + no * 0.5 + pulso * 0.8) * borda;
   gl_FragColor = vec4(uCor, a);
 }
@@ -42,8 +42,8 @@ export function Chao() {
     mat.current.uniforms.uProgresso.value = progresso.valor
   })
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.62, 0]}>
-      <planeGeometry args={[14, 14]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.62, -0.4]}>
+      <planeGeometry args={[6.4, 6.4]} />
       <shaderMaterial ref={mat} vertexShader={VERT} fragmentShader={FRAG} uniforms={uniforms} transparent depthWrite={false} />
     </mesh>
   )
