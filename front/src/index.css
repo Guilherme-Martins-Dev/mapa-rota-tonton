@@ -30,6 +30,7 @@ a.botao { display: inline-block; text-decoration: none; }
 .explorar { position: relative; min-height: 100svh; }
 .explorar .fundo, .explorar .fundo * { pointer-events: auto; }
 .painel { position: fixed; left: clamp(16px, 4vw, 48px); bottom: var(--e5); z-index: 2; display: flex; flex-direction: column; gap: var(--e3); max-width: min(32rem, calc(100vw - 32px)); padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
+.painel { max-height: calc(100svh - 96px); overflow-y: auto; }
 .metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
 
 /* página de texto */
@@ -49,7 +50,7 @@ a.botao { display: inline-block; text-decoration: none; }
 
 /* painel do mapa em telas estreitas: folha na base, métricas rolam na horizontal */
 @media (max-width: 640px) {
-  .painel { left: 0; right: 0; bottom: 0; max-width: none; padding: var(--e3); border-radius: var(--raio) var(--raio) 0 0; gap: var(--e2); }
+  .painel { max-height: 70svh; left: 0; right: 0; bottom: 0; max-width: none; padding: var(--e3); border-radius: var(--raio) var(--raio) 0 0; gap: var(--e2); }
   .metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .metricas > * { flex: none; }
   .painel .nota { display: none; }

@@ -29,6 +29,12 @@ function ehRota(f: unknown): f is RotaFeature {
   )
 }
 
+/** Confere que um JSON qualquer segue o contrato de rotas (usado também pela API). */
+export function ehRotas(json: unknown): json is Rotas {
+  const f = (json as Rotas | undefined)?.features
+  return Array.isArray(f) && f.length > 0 && f.every(ehRota)
+}
+
 /** Carrega e valida o GeoJSON; devolve null se faltar ou vier fora do contrato. */
 export async function carregarRotas(url = '/data/rotas.geojson'): Promise<Rotas | null> {
   try {
