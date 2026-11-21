@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
 import { MathUtils } from 'three'
+import { Chao } from '../cena/Chao'
 import { progresso } from '../cena/progresso'
 import { corToken } from '../cores'
 
@@ -41,6 +42,7 @@ export function Cena3D() {
     <Canvas camera={{ position: [0, 1.2, 6], fov: 40 }} dpr={[1, 2]} aria-hidden="true">
       <hemisphereLight args={[corToken('texto'), corToken('superficie-2'), 1.1]} />
       <directionalLight position={[4, 6, 3]} intensity={2} />
+      <Chao />
       <Carro />
       <Predio />
     </Canvas>

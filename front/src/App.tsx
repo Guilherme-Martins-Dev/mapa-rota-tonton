@@ -6,7 +6,7 @@ import { progresso } from './cena/progresso'
 import { SECOES } from './conteudo/secoes'
 import { rotaDoCriterio, type Criterio } from './data/tipos'
 import { useRotas } from './data/useRotas'
-import { Cartao, Metrica, SeletorCriterio } from './ui'
+import { Cartao, CRITERIOS, Metrica, SeletorCriterio } from './ui'
 
 // Mapa (deck.gl + MapLibre) e cena 3D (three) são pesados: carregam sob demanda.
 const Mapa = lazy(() => import('./components/Mapa').then((m) => ({ default: m.Mapa })))
@@ -25,6 +25,14 @@ export default function App() {
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       ScrollTrigger.create({ trigger: raiz.current, start: 'top top', end: 'bottom bottom', onUpdate: (st) => (progresso.valor = st.progress) })
+      // Seção das rotas fica pinada: o scroll percorre os três critérios em sequência.
+      ScrollTrigger.create({
+        trigger: '#rotas',
+        start: 'top top',
+        end: '+=150%',
+        pin: true,
+        onUpdate: (st) => setCriterio(CRITERIOS[Math.min(CRITERIOS.length - 1, Math.floor(st.progress * CRITERIOS.length))].id),
+      })
       gsap.utils.toArray<HTMLElement>('.secao').forEach((el) => {
         gsap.from(el.querySelector('.cartao'), {
           opacity: 0,

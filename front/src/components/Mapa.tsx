@@ -13,7 +13,7 @@ import { rotaDoCriterio, type Criterio, type RotaFeature, type Rotas } from '../
 // O Vite não resolve o worker do MapLibre sozinho: aponta a URL do arquivo empacotado.
 setWorkerUrl(workerUrl)
 
-const MESSEJANA = { longitude: -38.4935, latitude: -3.8267, zoom: 13.5, pitch: 45, bearing: 0 }
+const MESSEJANA = { longitude: -38.4935, latitude: -3.8267, zoom: 14.2, pitch: 45, bearing: 0 }
 const BASE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 const reduzMovimento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -25,8 +25,16 @@ function tempos(f: RotaFeature): number[] {
 
 export function Mapa({ rotas, criterio }: { rotas: Rotas | null; criterio: Criterio }) {
   const [t, setT] = useState(0)
-  const [vista, setVista] = useState(MESSEJANA)
   const animar = !reduzMovimento()
+  // Centro da câmera = centro da caixa das rotas (cai para Messejana sem dados).
+  const centro = useMemo(() => {
+    const pts = rotas?.features.flatMap((f) => f.geometry.coordinates) ?? []
+    if (!pts.length) return MESSEJANA
+    const lons = pts.map((p) => p[0]), lats = pts.map((p) => p[1])
+    return { ...MESSEJANA, longitude: (Math.min(...lons) + Math.max(...lons)) / 2, latitude: (Math.min(...lats) + Math.max(...lats)) / 2 }
+  }, [rotas])
+  const [vista, setVista] = useState(centro)
+  useEffect(() => setVista(centro), [centro])
 
   // Pulso do traço + deriva de câmera guiada pelo scroll, em um único rAF.
   useEffect(() => {
@@ -35,7 +43,7 @@ export function Mapa({ rotas, criterio }: { rotas: Rotas | null; criterio: Crite
     const t0 = performance.now()
     const laco = (agora: number) => {
       setT(((agora - t0) / 3000) % 1.6)
-      setVista((v) => ({ ...v, bearing: progresso.valor * 40, pitch: 45 + progresso.valor * 15 }))
+      setVista((v) => ({ ...v, bearing: progresso.valor * 40, pitch: 45 + progresso.valor * 10 }))
       id = requestAnimationFrame(laco)
     }
     id = requestAnimationFrame(laco)
@@ -53,7 +61,7 @@ export function Mapa({ rotas, criterio }: { rotas: Rotas | null; criterio: Crite
           getPath: (f) => f.geometry.coordinates as [number, number][],
           getColor: (f) => [...cor, f === rota ? 255 : 60] as [number, number, number, number],
           updateTriggers: { getColor: [criterio, rota] },
-          getWidth: 6,
+          getWidth: 14,
           widthUnits: 'meters',
         }),
         ...(rota && animar
