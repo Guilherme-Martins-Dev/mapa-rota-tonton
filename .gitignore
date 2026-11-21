@@ -16,3 +16,7 @@ __pycache__/
 
 # omc
 .omc/
+
+# front
+front/node_modules/
+front/dist/

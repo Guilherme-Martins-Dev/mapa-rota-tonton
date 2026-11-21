@@ -1,0 +1,9 @@
+:root { color-scheme: dark; --fundo: #0b0d10; --texto: #eef1f4; --acento: #ffbe3c; font-family: system-ui, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--fundo); color: var(--texto); }
+.fundo { position: fixed; inset: 0; z-index: 0; }
+.cena3d { position: fixed; right: 4vw; bottom: 4vh; width: min(30vw, 280px); aspect-ratio: 1; z-index: 1; pointer-events: none; }
+.secao { position: relative; z-index: 2; min-height: 100vh; display: flex; align-items: center; padding: 0 clamp(16px, 6vw, 80px); pointer-events: none; }
+.cartao { max-width: 28rem; padding: 1.5rem; background: color-mix(in srgb, var(--fundo) 85%, transparent); border: 1px solid #ffffff22; border-radius: 12px; pointer-events: auto; }
+.cartao h2 { margin: 0 0 .5rem; color: var(--acento); text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
