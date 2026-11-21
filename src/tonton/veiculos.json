@@ -1,0 +1,42 @@
+[
+  {
+    "id": "popular",
+    "nome": "Compacto popular",
+    "combustivel": "gasolina",
+    "consumo_urbano_l100": 8.3,
+    "consumo_estrada_l100": 6.9,
+    "origem": "perfil ilustrativo (curva padrão do projeto), não é um modelo real"
+  },
+  {
+    "id": "sedan",
+    "nome": "Sedã médio",
+    "combustivel": "gasolina",
+    "consumo_urbano_l100": 10.5,
+    "consumo_estrada_l100": 7.6,
+    "origem": "perfil ilustrativo, não é um modelo real"
+  },
+  {
+    "id": "suv",
+    "nome": "SUV",
+    "combustivel": "gasolina",
+    "consumo_urbano_l100": 12.8,
+    "consumo_estrada_l100": 9.2,
+    "origem": "perfil ilustrativo, não é um modelo real"
+  },
+  {
+    "id": "pickup",
+    "nome": "Picape média",
+    "combustivel": "diesel",
+    "consumo_urbano_l100": 11.5,
+    "consumo_estrada_l100": 8.4,
+    "origem": "perfil ilustrativo, não é um modelo real"
+  },
+  {
+    "id": "golf-tdi",
+    "nome": "Volkswagen Golf Alltrack 2.0 TDI",
+    "combustivel": "diesel",
+    "consumo_urbano_l100": 5.7,
+    "consumo_estrada_l100": 4.6,
+    "origem": "Car3DB, amostra v2 (licença MIT para dados de amostra): https://github.com/yucelozalp/car3db"
+  }
+]
