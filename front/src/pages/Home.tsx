@@ -33,16 +33,6 @@ export default function Home() {
         end: 'bottom top',
         onUpdate: (st) => (progresso.valor = st.progress),
       })
-      // Passagem de bastão: enquanto a viagem sobe sobre o hero, o carro do hero segue para o centro, encolhe e some;
-      // é onde o carro da viagem aparece.
-      gsap.to('.cena3d', {
-        xPercent: -22,
-        yPercent: 20,
-        scale: 0.55,
-        autoAlpha: 0,
-        ease: 'none',
-        scrollTrigger: { trigger: '#viagem', start: 'top bottom', end: 'top 25%', scrub: true },
-      })
       gsap.from('#inicio .cartao, #inicio .entra', { opacity: 0, y: 24, stagger: 0.08, ease: 'power3.out', duration: 0.6 })
     },
     { scope: raiz },
@@ -51,7 +41,7 @@ export default function Home() {
   return (
     <main ref={raiz}>
       {/* Suspense por dentro dos contêineres: o GSAP precisa achar .cena3d no DOM logo na montagem */}
-      <div className="fundo" aria-hidden="true">
+      <div className="fundo">
         <Suspense fallback={null}>
           <Mapa rotas={rotas} criterio="tempo" />
         </Suspense>

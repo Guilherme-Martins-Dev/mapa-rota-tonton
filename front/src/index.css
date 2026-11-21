@@ -6,7 +6,7 @@ body { margin: 0; background: var(--fundo); color: var(--texto); font-size: var(
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .fundo, .fundo * { pointer-events: none; }
 .fundo { position: fixed; inset: 0; z-index: 0; }
-.cena3d { position: fixed; right: 4vw; bottom: 4vh; width: min(70vw, 820px); aspect-ratio: 16 / 10; z-index: 4; pointer-events: none; }
+.cena3d { position: fixed; right: 4vw; bottom: 4vh; width: min(70vw, 820px); aspect-ratio: 16 / 10; z-index: 4; pointer-events: none; transform-origin: center; }
 .secao { position: relative; z-index: 2; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--e4); padding: 0 clamp(16px, 6vw, 80px); pointer-events: none; }
 .secao > * { pointer-events: auto; }
 :focus-visible { outline: 2px solid var(--texto); outline-offset: 2px; }
@@ -27,8 +27,11 @@ a.botao { display: inline-block; text-decoration: none; }
 .nota { margin: 0; max-width: 28rem; font-size: var(--t-1); color: var(--texto-suave); }
 
 /* viagem: seção pinada com o carro na rua; cada trecho do caminho é um capítulo */
-.viagem { position: relative; z-index: 3; height: 100svh; background: var(--fundo); overflow: clip; }
-.viagem__cena { position: absolute; inset: 0; }
+.viagem { position: relative; z-index: 3; height: 100svh; overflow: clip; } /* transparente: o mapa fixo aparece até a rua surgir */
+.viagem__cena { position: absolute; inset: 0; opacity: 0; }
+.viagem--lista .viagem__cena { opacity: 1; background: var(--fundo); }
+.viagem--mergulho .viagem__painel, .viagem--mergulho .viagem__capitulos { opacity: 0; pointer-events: none; }
+.viagem__painel, .viagem__capitulos { transition: opacity var(--dur) var(--ease); }
 .viagem__painel { position: absolute; left: clamp(16px, 6vw, 80px); top: calc(var(--e7) + var(--e4)); width: min(30rem, calc(100vw - 32px)); max-height: calc(100svh - var(--e7) - var(--e4) - var(--e5)); overflow-y: auto; padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
 .capitulo { display: grid; gap: var(--e3); animation: entrar 260ms var(--ease) both; }
 .capitulo h3 { margin: 0; font-size: var(--t2); font-weight: 600; text-wrap: balance; }

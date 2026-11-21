@@ -5,7 +5,8 @@ import { BufferGeometry, Float32BufferAttribute, MathUtils, type Group, type Obj
 import { corToken } from '../cores'
 import type { RotaFeature } from '../data/tipos'
 import { Caminho, criarCaminho, distribuirPredios, type Predio, type TipoPredio } from './caminho'
-import { INTRO_VIAGEM, viagem } from './progresso'
+import { reduzMovimento, usePausa } from './pausa'
+import { INTRO_VIAGEM, MERGULHO, viagem } from './progresso'
 
 const MEIA_PISTA = 2.2
 const CALCADA = 3.6
@@ -105,7 +106,7 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     const delta = Math.min(dt, 0.1) // aba em segundo plano: não deixa o carro "saltar"
     const prog = MathUtils.clamp(viagem.valor, 0, 1)
     const alvo = MathUtils.clamp((prog - INTRO_VIAGEM) / (1 - INTRO_VIAGEM), 0, 1) * rua.comprimento // o carro só anda depois da descida
-    const descida = MathUtils.smoothstep(prog, 0, INTRO_VIAGEM) // 0 = vista aérea da largada, 1 = câmera de perseguição
+    const descida = MathUtils.smoothstep(prog, MERGULHO, INTRO_VIAGEM) // 0 = vista aérea da largada, 1 = câmera de perseguição
     sRef.current = damp(sRef.current, alvo, 3.5, delta)
     const s = sRef.current
     const c = rua.em(s)
@@ -164,6 +165,14 @@ function posicaoInicial(rua: Caminho): [number, number, number] {
   return [c.x - c.tx * 3, ALTURA_AEREA, c.z - c.tz * 3] // a viagem começa de cima e desce até o carro
 }
 
+/** A rua só aparece depois que o mergulho começa; antes disso o canvas fica parado. */
+const ruaVisivel = () => reduzMovimento() || viagem.valor > MERGULHO * 0.3
+
+function Pausa() {
+  usePausa(ruaVisivel)
+  return null
+}
+
 export function CenaViagem({ rota }: { rota: RotaFeature | undefined }) {
   const rua = useMemo(() => (rota ? criarCaminho(rota.geometry.coordinates) : null), [rota])
   const predios = useMemo(() => (rua ? distribuirPredios(rua) : []), [rua])
@@ -187,6 +196,7 @@ export function CenaViagem({ rota }: { rota: RotaFeature | undefined }) {
         <planeGeometry args={[2400, 2400]} />
         <meshStandardMaterial color={fundo} roughness={1} />
       </mesh>
+      <Pausa />
       <Via rua={rua} />
       <Passeio rua={rua} predios={predios} />
     </Canvas>

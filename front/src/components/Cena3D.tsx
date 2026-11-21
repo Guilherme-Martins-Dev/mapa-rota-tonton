@@ -4,7 +4,8 @@ import { useRef } from 'react'
 import type { Group } from 'three'
 import { MathUtils } from 'three'
 import { Chao } from '../cena/Chao'
-import { progresso } from '../cena/progresso'
+import { usePausa, reduzMovimento } from '../cena/pausa'
+import { MERGULHO, progresso, viagem } from '../cena/progresso'
 import { corToken } from '../cores'
 
 const CARRO = '/models/carro.glb'
@@ -37,6 +38,14 @@ function Predio() {
   return <primitive ref={ref} object={scene} scale={0.2} position={[5, -0.62, 0]} />
 }
 
+/** O carro do hero só aparece até o fim do mergulho; depois disso o canvas para. */
+const heroVisivel = () => reduzMovimento() || viagem.valor < MERGULHO + 0.02
+
+function Pausa() {
+  usePausa(heroVisivel)
+  return null
+}
+
 export function Cena3D() {
   return (
     <Canvas camera={{ position: [0, 1.2, 6], fov: 40 }} dpr={[1, 2]} aria-hidden="true">
@@ -48,6 +57,7 @@ export function Cena3D() {
         <Lightformer form="rect" intensity={2} position={[-6, 1, 2]} scale={[2, 6, 1]} />
         <Lightformer form="rect" intensity={1.5} position={[6, 2, 3]} scale={[2, 5, 1]} />
       </Environment>
+      <Pausa />
       <Chao />
       <Carro />
       <Predio />

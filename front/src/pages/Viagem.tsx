@@ -4,7 +4,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { INTRO_VIAGEM, viagem } from '../cena/progresso'
+import { INTRO_VIAGEM, MERGULHO, viagem } from '../cena/progresso'
 import { CAPITULOS, type Capitulo } from '../conteudo/capitulos'
 import { rotaDoCriterio, type Rotas } from '../data/tipos'
 import { CRITERIOS, Metrica } from '../ui'
@@ -16,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 const fmt = (n: number, casas: number) => n.toFixed(casas).replace('.', ',')
 const N = CAPITULOS.length
 /** Rolagem total da viagem, em alturas de tela: ~1,4 telas por capítulo, tempo de ler e abrir uma pergunta. */
-const ALTURAS = 1000
+const ALTURAS = 1100
 
 /** Capítulo que cobre o progresso p (a descida inicial conta como o primeiro). */
 const capituloDe = (p: number) => Math.min(N - 1, Math.max(0, Math.floor(((p - INTRO_VIAGEM) / (1 - INTRO_VIAGEM)) * N)))
@@ -67,6 +67,25 @@ function Painel({ c, rotas, leitura }: { c: Capitulo; rotas: Rotas | null; leitu
  * A viagem: a seção fica pinada e o scroll leva o carro da largada à chegada. Cada trecho do caminho é um
  * capítulo do projeto. Com movimento reduzido não há pin: a cena fica parada e os capítulos viram uma lista.
  */
+/**
+ * Mergulho do hero na rua (progresso 0..MERGULHO): o carro do hero vai ao centro da tela, encolhe e se funde à cena da rua
+ * que aparece por baixo, enquanto o mapa (Mapa.tsx) dá zoom e inclina até a largada. É função só do progresso: reversível.
+ */
+function mergulhar(prog: number) {
+  const q = Math.min(1, Math.max(0, prog / MERGULHO))
+  const d = q * q * (3 - 2 * q)
+  const carro = document.querySelector<HTMLElement>('.cena3d')
+  const rua = document.querySelector<HTMLElement>('.viagem__cena')
+  if (carro) {
+    const dx = window.innerWidth / 2 - (carro.offsetLeft + carro.offsetWidth / 2)
+    const dy = window.innerHeight / 2 - (carro.offsetTop + carro.offsetHeight / 2)
+    const sai = Math.min(1, Math.max(0, (d - 0.55) / 0.45))
+    carro.style.transform = `translate3d(${dx * d}px, ${dy * d}px, 0) scale(${1 - 0.5 * d})`
+    carro.style.opacity = String(1 - sai)
+  }
+  if (rua) rua.style.opacity = String(Math.min(1, Math.max(0, (d - 0.45) / 0.55)))
+}
+
 export function Viagem({ rotas }: { rotas: Rotas | null }) {
   const raiz = useRef<HTMLElement>(null)
   const gatilho = useRef<ScrollTrigger | null>(null)
@@ -88,6 +107,7 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
         pin: true,
         onUpdate: (st) => {
           viagem.valor = st.progress
+          mergulhar(st.progress)
           setPct(Math.round(st.progress * 100))
         },
       })
@@ -106,7 +126,7 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
     : undefined
 
   return (
-    <section id="viagem" ref={raiz} className={reduz ? 'viagem viagem--lista' : 'viagem'} aria-labelledby="viagem-titulo">
+    <section id="viagem" ref={raiz} className={reduz ? 'viagem viagem--lista' : pct < MERGULHO * 100 + 1 ? 'viagem viagem--mergulho' : 'viagem'} aria-labelledby="viagem-titulo">
       <h2 id="viagem-titulo" className="sr-only">A viagem pelo projeto, em sete capítulos</h2>
       <div className="viagem__cena" aria-hidden="true">
         <Suspense fallback={null}>
