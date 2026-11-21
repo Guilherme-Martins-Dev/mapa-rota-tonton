@@ -16,6 +16,7 @@
 .constr__indice a { display: block; padding: var(--e1) 0; color: var(--texto-suave); text-decoration: none; transition: color var(--dur) var(--ease); }
 .constr a:focus-visible, .constr button:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
 @media (hover: hover) and (pointer: fine) { .constr__indice a:hover { color: var(--texto); } }
+.constr__indice a[aria-current='location'] { color: var(--acento); font-weight: 600; }
 @media (min-width: 960px) {
   .constr { grid-template-columns: 10rem minmax(0, 1fr); gap: var(--e7); }
   .constr__indice { display: block; position: sticky; top: calc(var(--e7) + var(--e3)); align-self: start; }

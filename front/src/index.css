@@ -37,7 +37,7 @@ a.botao { display: inline-block; text-decoration: none; }
 .capitulo { display: grid; gap: var(--e3); animation: entrar 260ms var(--ease) both; }
 .capitulo h3 { margin: 0; font-size: var(--t2); font-weight: 600; text-wrap: balance; }
 .capitulo p { margin: 0; line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
-.capitulo__metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
+.capitulo__metricas, .metricas { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--e2); }
 .pergunta { display: grid; gap: var(--e2); margin-top: var(--e1); }
 .capitulo .pergunta__p { margin: 0; font-size: var(--t0); font-weight: 600; line-height: 1.35; color: var(--texto); text-wrap: balance; }
 .capitulo .pergunta__r { margin: 0; font-size: var(--t-1); line-height: 1.6; }
@@ -66,8 +66,7 @@ a.botao { display: inline-block; text-decoration: none; }
   .capitulo { gap: var(--e2); }
   .capitulo h3 { font-size: var(--t1); }
   .capitulo p { font-size: var(--t-1); line-height: 1.5; }
-  .capitulo__metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .capitulo__metricas > * { flex: none; }
+  .capitulo__metricas { grid-template-columns: minmax(0, 1fr); }
   .viagem__creditos { left: var(--e3); right: var(--e3); bottom: var(--e2); font-size: 0.75rem; line-height: 1.35; }
   .viagem__capitulos { top: calc(var(--e7) + var(--e2)); right: 0; left: 0; transform: none; }
   .viagem__capitulos ol { display: flex; justify-content: center; gap: var(--e1); }
@@ -80,7 +79,6 @@ a.botao { display: inline-block; text-decoration: none; }
 .explorar .fundo, .explorar .fundo * { pointer-events: auto; }
 .painel { position: fixed; left: clamp(16px, 4vw, 48px); bottom: var(--e5); z-index: 2; display: flex; flex-direction: column; gap: var(--e3); max-width: min(32rem, calc(100vw - 32px)); padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
 .painel { max-height: calc(100svh - 96px); overflow-y: auto; }
-.metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
 
 /* página de texto */
 .texto { max-width: 42rem; margin: 0 auto; padding: calc(var(--e7) + var(--e5)) var(--e4) var(--e7); }
@@ -100,8 +98,7 @@ a.botao { display: inline-block; text-decoration: none; }
 /* painel do mapa em telas estreitas: folha na base, métricas rolam na horizontal */
 @media (max-width: 640px) {
   .painel { max-height: 70svh; left: 0; right: 0; bottom: 0; max-width: none; padding: var(--e3); border-radius: var(--raio) var(--raio) 0 0; gap: var(--e2); }
-  .metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .metricas > * { flex: none; }
+  .metricas { grid-template-columns: minmax(0, 1fr); }
   .painel .nota { display: none; }
   .painel .seletor { align-self: stretch; }
   .painel .seletor label { flex: 1; }

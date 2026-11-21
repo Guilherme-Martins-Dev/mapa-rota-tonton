@@ -3,7 +3,7 @@
 .cartao h2 { margin: 0 0 var(--e2); font-size: var(--t2); line-height: 1.15; font-weight: 600; text-wrap: balance; }
 .cartao p { margin: 0; font-size: var(--t0); line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
 
-.metrica { display: inline-flex; flex-direction: column; gap: var(--e1); align-self: flex-start; padding: var(--e2) var(--e3); background: var(--superficie-2); border-radius: var(--e2); font-variant-numeric: tabular-nums; }
+.metrica { display: flex; flex-direction: column; justify-content: space-between; gap: var(--e1); min-width: 0; padding: var(--e2) var(--e3); background: var(--superficie-2); border-radius: var(--e2); font-variant-numeric: tabular-nums; }
 .metrica__valor { font-size: var(--t2); font-weight: 600; line-height: 1; }
 .metrica__rotulo { font-size: var(--t-1); color: var(--texto-suave); }
 .metrica[data-melhor='true'] .metrica__valor { color: var(--cor-criterio, var(--texto)); }

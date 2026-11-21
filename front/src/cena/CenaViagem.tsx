@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { BufferGeometry, Float32BufferAttribute, MathUtils, type Group, type Object3D, type PointLight } from 'three'
 
 /** Raio da roda do Corolla na cena (2,92 do modelo x 0,1064 da escala de conversão). */
-const RAIO_RODA = 0.311
+const RAIO_RODA = 0.358
 const RODAS = ['tras_a', 'tras_b', 'frente_a', 'frente_b'] as const
 interface Roda { roda: Object3D; direcao: Object3D; frente: boolean }
 import { corToken } from '../cores'
@@ -145,7 +145,7 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
       r.direcao.rotation.y = damp(r.direcao.rotation.y, r.frente ? esterco : 0, 10, delta)
     }
     // Inclina na curva: quanto mais rápido o rumo muda, mais a carroceria rola para o lado de fora.
-    if (corpo.current) corpo.current.rotation.x = damp(corpo.current.rotation.x, MathUtils.clamp((dif / Math.max(delta, 1e-3)) * 0.012, -0.07, 0.07), 6, delta)
+    if (corpo.current) corpo.current.rotation.x = damp(corpo.current.rotation.x, MathUtils.clamp((dif / Math.max(delta, 1e-3)) * 0.008, -0.04, 0.04), 6, delta)
     // Câmera atrás do carro, pelo rumo suavizado: ela "entra" nas curvas um instante depois do carro.
     const tx = Math.cos(novo), tz = -Math.sin(novo)
     const cam = state.camera
@@ -174,10 +174,10 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
   return (
     <>
       <group ref={grupo} position={[inicio.x, 0, inicio.z]}>
-        <group ref={corpo} position={[0, 0.03, 0]}>
+        <group ref={corpo} position={[0, 0.05, 0]}>
           <Clone object={carro} scale={1} />
         </group>
-        <ContactShadows position={[0, 0.02, 0]} opacity={0.6} scale={8} blur={2.2} far={1.5} resolution={256} />
+        <ContactShadows position={[0, 0.03, 0]} opacity={0.6} scale={8} blur={2.2} far={1.5} resolution={256} />
       </group>
       <pointLight ref={luz} intensity={70} distance={34} decay={2} />
       <Vizinhos predios={predios} sRef={sRef} modelos={modelos} />

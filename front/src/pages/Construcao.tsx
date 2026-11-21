@@ -1,9 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   COMANDOS, DECISOES, ETAPAS, FONTES, FRONT_TECNICAS, INDICE, LIMITES, NIVEIS, NUMEROS, PERGUNTAS, PILHA, REFERENCIAS,
   type Nivel,
 } from '../conteudo/construcao'
 import './construcao.css'
+
+/** Só no desktop, onde o índice e a resposta ficam fixos: ali a leitura acompanha a rolagem. */
+const desktop = () => window.matchMedia('(min-width: 960px)').matches
 
 const rotuloNivel = (n: Nivel) => NIVEIS.find((x) => x.id === n)?.rotulo
 
@@ -14,6 +17,30 @@ export default function Construcao() {
   const lista = useMemo(() => PERGUNTAS.filter((q) => nivel === 'todos' || q.nivel === nivel), [nivel])
   const atual = lista[Math.min(sel, lista.length - 1)]
   const contagem = (n: Nivel) => PERGUNTAS.filter((q) => q.nivel === n).length
+  const [secao, setSecao] = useState<string>(INDICE[0].id)
+
+  // Seção em foco: a que cruza a faixa de leitura (um terço superior da janela).
+  useEffect(() => {
+    if (!desktop()) return
+    const io = new IntersectionObserver(
+      (es) => es.forEach((e) => e.isIntersecting && setSecao(e.target.id)),
+      { rootMargin: '-20% 0px -70% 0px' },
+    )
+    INDICE.forEach((i) => { const el = document.getElementById(i.id); if (el) io.observe(el) })
+    return () => io.disconnect()
+  }, [])
+
+  // Pergunta em foco: a resposta fixa troca conforme a lista passa pela faixa de leitura.
+  useEffect(() => {
+    if (!desktop()) return
+    const io = new IntersectionObserver(
+      (es) => es.forEach((e) => { if (e.isIntersecting) setSel(Number((e.target as HTMLElement).dataset.i)) }),
+      { rootMargin: '-35% 0px -55% 0px' },
+    )
+    document.querySelectorAll('.constr__perguntas li').forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [lista])
+
   const filtrar = (n: Nivel | 'todos') => {
     setNivel(n)
     setSel(0)
@@ -24,7 +51,7 @@ export default function Construcao() {
       <nav className="constr__indice" aria-label="Nesta página">
         <ol>
           {INDICE.map((i) => (
-            <li key={i.id}><a href={`#${i.id}`}>{i.rotulo}</a></li>
+            <li key={i.id}><a href={`#${i.id}`} aria-current={secao === i.id ? 'location' : undefined}>{i.rotulo}</a></li>
           ))}
         </ol>
       </nav>
@@ -132,7 +159,7 @@ export default function Construcao() {
           <div className="constr__qa">
             <ul className="constr__perguntas">
               {lista.map((q, i) => (
-                <li key={q.p}>
+                <li key={q.p} data-i={i}>
                   <button type="button" aria-expanded={i === sel} onClick={() => setSel(i)}>
                     <span>{q.p}</span>
                     {nivel === 'todos' && <small>{rotuloNivel(q.nivel)}</small>}

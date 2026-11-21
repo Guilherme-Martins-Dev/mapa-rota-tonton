@@ -34,8 +34,8 @@ function separarRodas() {
     for (let t = 0; t < ind.length; t += 3) if (novo.has(ind[t]) && novo.has(ind[t + 1]) && novo.has(ind[t + 2])) tris.push(novo.get(ind[t]), novo.get(ind[t + 1]), novo.get(ind[t + 2]))
     const f = (fonte, dim, centro) => { const out = new Float32Array(ids.length * dim); ids.forEach((id, k) => { const e = fonte.getElement(id, new Array(dim).fill(0)); for (let d = 0; d < dim; d++) out[k * dim + d] = e[d] - (centro ? centro[d] : 0) }); return out }
     const p2 = doc.createPrimitive().setAttribute('POSITION', acc('VEC3', f(pos, 3, c))).setAttribute('NORMAL', acc('VEC3', f(nor, 3))).setAttribute('TEXCOORD_0', acc('VEC2', f(uv, 2))).setIndices(acc('SCALAR', new Uint16Array(tris))).setMaterial(prim.getMaterial())
-    const roda = doc.createNode('roda_' + nomes[g]).setMesh(doc.createMesh('roda_' + nomes[g]).addPrimitive(p2))
-    const dir = doc.createNode('direcao_' + nomes[g]).setTranslation([no.getTranslation()[0] + c[0], no.getTranslation()[1] + c[1], no.getTranslation()[2] + c[2]]).addChild(roda)
+    const roda = doc.createNode('roda_' + nomes[g]).setScale([1.15, 1.15, 1.15]).setMesh(doc.createMesh('roda_' + nomes[g]).addPrimitive(p2))
+    const dir = doc.createNode('direcao_' + nomes[g]).setTranslation([no.getTranslation()[0] + c[0] + (g & 1 ? 2.2 : -2.2), no.getTranslation()[1] + c[1], no.getTranslation()[2] + c[2]]).addChild(roda)
     no.getParentNode().addChild(dir)
   }
   no.getMesh().dispose()
