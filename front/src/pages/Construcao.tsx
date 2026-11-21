@@ -62,7 +62,7 @@ export default function Construcao() {
         <header id="resumo">
           <h1>{t('constrTitulo')}</h1>
           <p className="constr__lead">{t('constrLead')}</p>
-          <p className="constr__lead">{autoria}</p>
+          <p className="constr__autoria">{autoria}</p>
           <dl className="constr__numeros">
             {NUMEROS.map((n) => (
               <div key={n.rotulo}>

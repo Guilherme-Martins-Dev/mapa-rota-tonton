@@ -133,3 +133,46 @@ html.carro-ativa::view-transition-old(carro-tema) { display: none; }
 html.tema-fade, html.tema-fade *, html.tema-fade *::before, html.tema-fade *::after {
   transition: background-color 0.45s ease, border-color 0.45s ease, color 0.45s ease, fill 0.45s ease !important;
 }
+
+/* ---- celular: detalhes ---- */
+.marca__curta, .viagem__creditos-curto { display: none; }
+.constr__autoria { max-width: var(--leitura); margin: var(--e4) 0 0; padding: var(--e3) var(--e4); border-left: 3px solid var(--c-tempo); border-radius: var(--raio); background: var(--superficie); font-size: var(--t-1); line-height: 1.6; color: var(--texto-suave); }
+.barra { backdrop-filter: blur(10px); background: color-mix(in srgb, var(--fundo) 92%, transparent); }
+.botao, .acoes .link { white-space: nowrap; }
+.acoes { flex-wrap: wrap; align-items: center; }
+@media (max-width: 640px) {
+  body .barra { padding-inline: 12px; gap: var(--e2); }
+  body .barra nav { gap: 10px; }
+  body .barra nav a { font-size: 0.8125rem; }
+  body .barra .marca__longa { display: none; }
+  body .barra .marca__curta { display: inline; }
+  body .barra__botao { min-width: 34px; height: 34px; padding-inline: 6px; font-size: 0.8125rem; }
+  body .botao { padding: var(--e3); font-size: var(--t-1); }
+  /* viagem: painel mais baixo e sem rolagem interna; leitura em km vira um selo no topo */
+  body .viagem__painel { bottom: 76px; max-height: 50svh; padding: var(--e3); }
+  body .capitulo { gap: var(--e2); }
+  body .capitulo .capitulo__leitura { order: -1; font-size: 0.75rem; }
+  body .capitulo .pergunta__p { font-size: 0.9375rem; }
+  body .capitulo .pergunta__r { font-size: 0.8125rem; line-height: 1.5; }
+  body .viagem__creditos { padding: var(--e1) var(--e3); font-size: 0.6875rem; line-height: 1.35; }
+  body .viagem__creditos-longo { display: none; }
+  body .viagem__creditos-curto { display: inline; }
+  body .viagem__capitulos ol { gap: 0; }
+  body .viagem__capitulos button { background: transparent; }
+  /* explorar: folha embaixo, mais baixa; o mapa fica com a maior parte da tela */
+  body .painel { left: 0; right: 0; bottom: 0; max-width: none; max-height: 56svh; padding: var(--e3); gap: var(--e2); border-radius: var(--raio) var(--raio) 0 0; }
+  body .capitulo__metricas, body .metricas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e1); }
+  body .metrica { padding: var(--e2); }
+  body .metrica__valor { font-size: var(--t1); }
+  body .metrica__rotulo { font-size: 0.6875rem; line-height: 1.3; }
+  body .seletor { align-self: stretch; justify-content: space-between; }
+  body .seletor label { flex: 1; text-align: center; }
+  body .seletor span { padding: var(--e2) var(--e1); font-size: 0.75rem; }
+  body .nota { font-size: 0.75rem; }
+  body .painel { background: color-mix(in srgb, var(--fundo) 96%, transparent); }
+  /* a atribuição do mapa (OSM/CARTO) sobe para o topo: a folha de baixo a esconderia */
+  body .explorar .maplibregl-ctrl-bottom-right { bottom: auto; top: 64px; }
+  /* construção */
+  body .constr__lead { font-size: var(--t0); margin-top: var(--e4); }
+  body .constr__autoria { padding: var(--e3); }
+}

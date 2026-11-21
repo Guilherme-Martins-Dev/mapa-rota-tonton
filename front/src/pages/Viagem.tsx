@@ -190,7 +190,9 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
         </>
       )}
       <p className="viagem__creditos">
-        {t('viagemCreditos')} <Link to="/construcao" className="link">{t('fontesLicencas')}</Link>
+        <span className="viagem__creditos-longo">{t('viagemCreditos')}</span>
+        <span className="viagem__creditos-curto">{t('viagemCreditosCurto')}</span>{' '}
+        <Link to="/construcao" className="link">{t('fontesLicencas')}</Link>
       </p>
     </section>
   )

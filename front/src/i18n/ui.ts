@@ -5,6 +5,7 @@ const pt = {
   descricao:
     'Demonstração de rotas em Messejana, Fortaleza: um grafo do OpenStreetMap, Dijkstra, A* e Yen escolhem o caminho por distância, tempo ou consumo de combustível.',
   marca: 'Rotas de Messejana',
+  marcaCurta: 'Messejana',
   navPrincipal: 'Principal',
   navMapa: 'Mapa',
   navMetodo: 'Método',
@@ -31,6 +32,7 @@ const pt = {
   leituraKm: (parte: string, total: string) => `${parte} de ${total} km`,
   viagemCreditos:
     'Ruas: OpenStreetMap (ODbL). Mapa: CARTO. Veículos: Car3DB (MIT). Carro "Toyota Corola" de danieljorge435, CC BY 4.0, via MeshFleet. Trânsito simulado.',
+  viagemCreditosCurto: 'OpenStreetMap (ODbL) · CARTO · Car3DB (MIT) · carro de danieljorge435 (CC BY 4.0). Trânsito simulado.',
   fontesLicencas: 'Fontes e licenças',
   comoConstruido: 'Como foi construído',
   // explorar
@@ -107,6 +109,7 @@ const en: Dic = {
   descricao:
     'Route demo for Messejana, Fortaleza, Brazil: an OpenStreetMap graph, Dijkstra, A* and Yen pick the path by distance, time or fuel use.',
   marca: 'Messejana Routes',
+  marcaCurta: 'Messejana',
   navPrincipal: 'Main',
   navMapa: 'Map',
   navMetodo: 'Method',
@@ -132,6 +135,7 @@ const en: Dic = {
   leituraKm: (parte: string, total: string) => `${parte} of ${total} km`,
   viagemCreditos:
     'Streets: OpenStreetMap (ODbL). Map: CARTO. Vehicles: Car3DB (MIT). Car "Toyota Corola" by danieljorge435, CC BY 4.0, via MeshFleet. Simulated traffic.',
+  viagemCreditosCurto: 'OpenStreetMap (ODbL) · CARTO · Car3DB (MIT) · car by danieljorge435 (CC BY 4.0). Simulated traffic.',
   fontesLicencas: 'Sources and licenses',
   comoConstruido: 'How it was built',
   explorarTitulo: 'Explore the routes of Messejana',

@@ -1,7 +1,6 @@
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
-import { useConteudo } from './i18n/conteudo'
+import { ConteudoOculto } from './components/ConteudoOculto'
 import { useIdioma, useT } from './i18n/useIdioma'
-import { AUTOR, COLABORADORES, CURSO, CURSO_EN, PROFESSOR } from './conteudo/equipe'
 import Construcao from './pages/Construcao'
 import Explorar from './pages/Explorar'
 import Home from './pages/Home'
@@ -47,36 +46,15 @@ function BotaoIdioma() {
   )
 }
 
-/**
- * Rodapé só para leitores de tela e buscadores (fora da vista): a autoria, as funções e o curso de cada pessoa,
- * a disciplina e a instituição, no idioma atual. É o mesmo conteúdo do capítulo "Créditos" e do JSON-LD do index.html.
- */
-function RodapeOculto() {
-  const { idioma } = useIdioma()
-  const { autoria } = useConteudo()
-  const pt = idioma === 'pt'
-  const curso = pt ? CURSO : CURSO_EN
-  return (
-    <footer className="sr-only" aria-label={pt ? 'Autoria e créditos' : 'Authorship and credits'}>
-      <h2>{pt ? 'Autoria e créditos' : 'Authorship and credits'}</h2>
-      <p>{autoria}</p>
-      <ul>
-        <li>{AUTOR}: {pt ? 'desenvolvedor do projeto' : 'project developer'}, {curso}.</li>
-        {COLABORADORES.map((c) => (
-          <li key={c}>{c}: {pt ? 'colaborador na validação dos dados' : 'data-validation collaborator'}, {curso}.</li>
-        ))}
-        <li>{PROFESSOR}: {pt ? 'professor responsável' : 'professor in charge'}.</li>
-      </ul>
-    </footer>
-  )
-}
-
 export default function App() {
   const t = useT()
   return (
     <BrowserRouter>
       <header className="barra">
-        <Link to="/" className="marca">{t('marca')}</Link>
+        <Link to="/" className="marca" aria-label={t('marca')}>
+          <span className="marca__longa">{t('marca')}</span>
+          <span className="marca__curta" aria-hidden="true">{t('marcaCurta')}</span>
+        </Link>
         <nav aria-label={t('navPrincipal')}>
           <NavLink to="/mapa">{t('navMapa')}</NavLink>
           <NavLink to="/metodo">{t('navMetodo')}</NavLink>
@@ -91,7 +69,7 @@ export default function App() {
         <Route path="/metodo" element={<Metodo />} />
         <Route path="/construcao" element={<Construcao />} />
       </Routes>
-      <RodapeOculto />
+      <ConteudoOculto />
     </BrowserRouter>
   )
 }

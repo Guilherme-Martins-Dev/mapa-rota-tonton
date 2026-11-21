@@ -74,7 +74,8 @@ export async function trocarTemaComCarro(aplicar: () => void): Promise<void> {
   tela.className = 'carro-tema'
   const estilo = document.createElement('style')
   estilo.textContent = 'html.carro-ativa::view-transition-new(root){clip-path:circle(0px at 0 0)}'
-  document.head.append(tela, estilo)
+  document.head.append(estilo)
+  document.body.append(tela) // no <head> o canvas ficaria com display:none e o carro nunca apareceria
   html.classList.add('carro-ativa')
   try {
     const vt = document.startViewTransition(aplicar)
