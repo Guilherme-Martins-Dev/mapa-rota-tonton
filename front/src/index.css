@@ -4,8 +4,35 @@
 html, body { overflow-x: clip; }
 body { margin: 0; background: var(--fundo); color: var(--texto); font-size: var(--t0); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.fundo, .fundo * { pointer-events: none; }
 .fundo { position: fixed; inset: 0; z-index: 0; }
 .cena3d { position: fixed; right: 4vw; bottom: 4vh; width: min(70vw, 820px); aspect-ratio: 16 / 10; z-index: 1; pointer-events: none; }
 .secao { position: relative; z-index: 2; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--e4); padding: 0 clamp(16px, 6vw, 80px); pointer-events: none; }
 .secao > * { pointer-events: auto; }
 :focus-visible { outline: 2px solid var(--texto); outline-offset: 2px; }
+
+/* barra simples: marca, dois links */
+.barra { position: fixed; inset: 0 0 auto 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: var(--e3) clamp(16px, 6vw, 80px); background: var(--veu); }
+.barra a { color: var(--texto); text-decoration: none; font-size: var(--t-1); }
+.barra .marca { font-weight: 600; font-size: var(--t0); }
+.barra nav { display: flex; gap: var(--e4); }
+.barra nav a { color: var(--texto-suave); }
+.barra nav a.active { color: var(--texto); font-weight: 600; }
+
+h1 { margin: 0 0 var(--e3); font-size: var(--t4); line-height: 1.05; font-weight: 600; text-wrap: balance; }
+.cartao h1 + p { margin: 0; }
+.acoes { display: flex; align-items: center; gap: var(--e4); }
+a.botao { display: inline-block; text-decoration: none; }
+.link { color: var(--texto); }
+.nota { margin: 0; max-width: 28rem; font-size: var(--t-1); color: var(--texto-suave); }
+
+/* explorar: mapa livre + painel */
+.explorar { position: relative; min-height: 100svh; }
+.explorar .fundo, .explorar .fundo * { pointer-events: auto; }
+.painel { position: fixed; left: clamp(16px, 4vw, 48px); bottom: var(--e5); z-index: 2; display: flex; flex-direction: column; gap: var(--e3); max-width: min(32rem, calc(100vw - 32px)); padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
+.metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
+
+/* página de texto */
+.texto { max-width: 42rem; margin: 0 auto; padding: calc(var(--e7) + var(--e5)) var(--e4) var(--e7); }
+.texto h2 { margin: var(--e6) 0 var(--e2); font-size: var(--t2); font-weight: 600; }
+.texto p { margin: 0; line-height: 1.7; color: var(--texto-suave); text-wrap: pretty; }
