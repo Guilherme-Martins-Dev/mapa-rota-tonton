@@ -26,6 +26,20 @@ a.botao { display: inline-block; text-decoration: none; }
 .link { color: var(--texto); }
 .nota { margin: 0; max-width: 28rem; font-size: var(--t-1); color: var(--texto-suave); }
 
+/* viagem: seção pinada com o carro na rua (cobre o mapa e a cena fixa) */
+.viagem { position: relative; z-index: 3; height: 100svh; background: var(--fundo); overflow: clip; }
+.viagem__cena { position: absolute; inset: 0; }
+.viagem__texto { position: absolute; left: clamp(16px, 6vw, 80px); top: calc(var(--e7) + var(--e4)); max-width: min(26rem, calc(100vw - 32px)); padding: var(--e4); background: var(--veu); border-radius: var(--raio); display: grid; gap: var(--e2); }
+.viagem__texto h2 { margin: 0; font-size: var(--t2); font-weight: 600; text-wrap: balance; }
+.viagem__texto p { margin: 0; line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
+.viagem__texto .viagem__leitura { color: var(--c-tempo); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .viagem__texto { left: var(--e3); right: var(--e3); top: calc(var(--e7) + var(--e2)); max-width: none; padding: var(--e3); gap: var(--e1); }
+  .viagem__texto h2 { font-size: var(--t1); }
+  .viagem__texto p { font-size: var(--t-1); line-height: 1.5; }
+}
+
 /* explorar: mapa livre + painel */
 .explorar { position: relative; min-height: 100svh; }
 .explorar .fundo, .explorar .fundo * { pointer-events: auto; }

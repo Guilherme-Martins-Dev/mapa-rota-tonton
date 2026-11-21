@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { lazy, Suspense, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { progresso } from '../cena/progresso'
+import { progresso, viagem } from '../cena/progresso'
 import { AVISO_DADOS, HERO, SECOES } from '../conteudo/secoes'
 import { rotaDoCriterio, type Criterio } from '../data/tipos'
 import { useRotas } from '../data/useRotas'
@@ -11,6 +11,7 @@ import { Cartao, CRITERIOS, Metrica, SeletorCriterio } from '../ui'
 
 // Mapa (deck.gl + MapLibre) e cena 3D (three) são pesados: carregam sob demanda.
 const Mapa = lazy(() => import('../components/Mapa').then((m) => ({ default: m.Mapa })))
+const CenaViagem = lazy(() => import('../cena/CenaViagem').then((m) => ({ default: m.CenaViagem })))
 const Cena3D = lazy(() => import('../components/Cena3D').then((m) => ({ default: m.Cena3D })))
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -22,11 +23,16 @@ export default function Home() {
   const dados = useRotas()
   const rotas = dados.estado === 'pronto' ? dados.rotas : null
   const [criterio, setCriterio] = useState<Criterio>('tempo')
+  const [pct, setPct] = useState(0) // % da viagem, em passos de 1 para não re-renderizar a cada pixel
   const rota = useMemo(() => rotaDoCriterio(rotas, criterio), [rotas, criterio])
 
   useGSAP(
     () => {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        viagem.valor = 0.3 // sem scroll animado: a cena mostra um quadro parado no meio da rua
+        setPct(30)
+        return
+      }
       ScrollTrigger.create({
         trigger: raiz.current,
         start: 'top top',
@@ -40,6 +46,17 @@ export default function Home() {
         end: '+=150%',
         pin: true,
         onUpdate: (st) => setCriterio(CRITERIOS[Math.min(CRITERIOS.length - 1, Math.floor(st.progress * CRITERIOS.length))].id),
+      })
+      // A viagem: a seção fica pinada e o scroll leva o carro da origem ao destino.
+      ScrollTrigger.create({
+        trigger: '#viagem',
+        start: 'top top',
+        end: '+=400%',
+        pin: true,
+        onUpdate: (st) => {
+          viagem.valor = st.progress
+          setPct(Math.round(st.progress * 100))
+        },
       })
       gsap.utils.toArray<HTMLElement>('.secao').forEach((el) => {
         gsap.from(el.querySelectorAll('.cartao, .entra'), {
@@ -97,6 +114,27 @@ export default function Home() {
           )}
         </section>
       ))}
+
+      <section id="viagem" className="viagem" aria-labelledby="viagem-titulo">
+        <div className="viagem__cena" aria-hidden="true">
+          <Suspense fallback={null}>
+            <CenaViagem rota={rota} />
+          </Suspense>
+        </div>
+        <div className="viagem__texto">
+          <h2 id="viagem-titulo">A mesma rota, do banco do motorista</h2>
+          <p>
+            O carro percorre a rota de menor tempo, com as curvas do grafo suavizadas. Os prédios ao redor são
+            ilustrativos: o OpenStreetMap não traz modelos 3D deles.
+          </p>
+          {rota && (
+            <p className="viagem__leitura">
+              {fmt((pct / 100) * rota.properties.distancia_km, 2)} de {fmt(rota.properties.distancia_km, 2)} km,{' '}
+              {fmt(((100 - pct) / 100) * rota.properties.tempo_min, 1)} min para chegar
+            </p>
+          )}
+        </div>
+      </section>
     </main>
   )
 }
