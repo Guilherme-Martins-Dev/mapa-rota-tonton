@@ -3,12 +3,12 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
 import { MathUtils } from 'three'
+import { CARRO_GLB as CARRO } from '../cena/modelos'
 import { Chao } from '../cena/Chao'
 import { usePausa, reduzMovimento } from '../cena/pausa'
 import { MERGULHO, progresso, viagem } from '../cena/progresso'
 import { corToken } from '../cores'
 
-const CARRO = '/models/carro.glb'
 const PREDIO = '/models/predio.glb'
 
 /** Carro: gira com o scroll e se afasta para dar lugar ao prédio na segunda metade. */

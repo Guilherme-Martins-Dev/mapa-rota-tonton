@@ -68,7 +68,7 @@ export default function Home() {
       <footer className="rodape">
         <p>
           Dados de ruas © colaboradores do OpenStreetMap (ODbL). Mapa base © CARTO. Amostra de veículos: Car3DB (MIT).
-          Trânsito simulado; a TomTom não foi consultada.
+          Carro: "Toyota Corola" de danieljorge435 (Sketchfab, CC BY 4.0), obtido pelo MeshFleet, redimensionado e reorientado. Trânsito simulado; a TomTom não foi consultada.
         </p>
       </footer>
     </main>

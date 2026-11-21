@@ -5,6 +5,7 @@ import { BufferGeometry, Float32BufferAttribute, MathUtils, type Group, type Obj
 import { corToken } from '../cores'
 import type { RotaFeature } from '../data/tipos'
 import { Caminho, criarCaminho, distribuirPredios, type Predio, type TipoPredio } from './caminho'
+import { CARRO_GLB } from './modelos'
 import { reduzMovimento, usePausa } from './pausa'
 import { INTRO_VIAGEM, MERGULHO, viagem } from './progresso'
 
@@ -87,7 +88,7 @@ const damp = MathUtils.damp
 
 /** Carro e câmera de perseguição guiados por `viagem.valor` (0..1). O carro aponta para a tangente da rua. */
 function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
-  const carro = useGLTF('/models/carro.glb').scene
+  const carro = useGLTF(CARRO_GLB).scene
   const modelos: Modelos = {
     predio: useGLTF('/models/predio.glb').scene,
     torre: useGLTF('/models/torre.glb').scene,
@@ -203,4 +204,5 @@ export function CenaViagem({ rota }: { rota: RotaFeature | undefined }) {
   )
 }
 
-;['carro', 'predio', 'torre', 'comercio', 'casa', 'medio'].forEach((m) => useGLTF.preload(`/models/${m}.glb`))
+;useGLTF.preload(CARRO_GLB)
+;['predio', 'torre', 'comercio', 'casa', 'medio'].forEach((m) => useGLTF.preload(`/models/${m}.glb`))
