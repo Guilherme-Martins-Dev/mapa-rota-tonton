@@ -1,4 +1,5 @@
 import { AVISO_DADOS } from '../conteudo/secoes'
+import { Tx } from '../ui/Tx'
 
 /** Página de método: o que o back-end faz, em ordem. Texto corrido, largura de leitura. */
 export default function Metodo() {
@@ -14,14 +15,12 @@ export default function Metodo() {
 
       <h2>Um grafo, dois pesos de tempo</h2>
       <p>
-        O tempo de um trecho é o comprimento dividido pela velocidade. Guardamos dois: o tempo livre, com a velocidade da via, e o
-        tempo atual, com a velocidade informada pela TomTom nas vias principais.
+        <Tx>{'O tempo de um trecho é o comprimento dividido pela velocidade, $t = \ell / v$. Guardamos dois: o tempo livre, com a velocidade da via, e o tempo atual, com a velocidade informada pela TomTom nas vias principais.'}</Tx>
       </p>
 
       <h2>O Dijkstra</h2>
       <p>
-        O Dijkstra é um algoritmo guloso com relaxamento: se chegar a <em>v</em> passando por <em>u</em> custa menos do que o melhor
-        caminho conhecido até <em>v</em>, o custo de <em>v</em> é atualizado. Trocar o peso das arestas troca o critério da rota.
+        <Tx>{'O Dijkstra é um algoritmo guloso com relaxamento: se chegar a $v$ passando por $u$ custa menos do que o melhor caminho conhecido até $v$, isto é, se $d[u] + w(u,v) < d[v]$, então $d[v] \leftarrow d[u] + w(u,v)$. Trocar o peso das arestas troca o critério da rota.'}</Tx>
       </p>
 
       <h2>Distância, tempo e consumo</h2>

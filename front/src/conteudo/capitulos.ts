@@ -3,6 +3,8 @@
  * Tudo aqui é afirmado a partir do código do back-end (src/tonton) ou dos dados reais do grafo de Messejana;
  * nada é estimativa. Números do grafo: `carregar_grafo()` em 2026-11-21.
  */
+import { AUTOR, COLABORADORES, CONTEXTO, CREDITOS, PERFIL_PROFESSOR, PROFESSOR } from './equipe'
+
 export interface Pergunta {
   p: string
   r: string
@@ -68,7 +70,7 @@ export const CAPITULOS: Capitulo[] = [
     rotulo: 'Pesos',
     titulo: 'Três pesos, três rotas',
     texto:
-      'A distância usa o comprimento da aresta. O tempo divide o comprimento pela velocidade da via. O consumo converte comprimento e velocidade em litros. A rota é a mesma busca com um peso diferente.',
+      'A distância usa o comprimento da aresta. O tempo divide o comprimento pela velocidade da via: $t = \\ell / v$. O consumo converte comprimento e velocidade em litros. A rota é a mesma busca com um peso diferente.',
     metricas: true,
     perguntas: [
       {
@@ -86,7 +88,7 @@ export const CAPITULOS: Capitulo[] = [
     rotulo: 'Algoritmo',
     titulo: 'Como o caminho é escolhido',
     texto:
-      'O Dijkstra, escrito à mão com fila de prioridade, acha o caminho de menor peso. O A* faz o mesmo com uma estimativa em linha reta para explorar menos vértices. O Yen lista caminhos alternativos.',
+      'O Dijkstra, escrito à mão com fila de prioridade, acha o caminho de menor peso. O A* faz o mesmo com uma estimativa em linha reta $h(v)$ para explorar menos vértices. O Yen lista caminhos alternativos.',
     perguntas: [
       {
         p: 'Por que o Dijkstra acerta?',
@@ -98,7 +100,7 @@ export const CAPITULOS: Capitulo[] = [
       },
       {
         p: 'Qual a complexidade?',
-        r: 'Com fila de prioridade binária (heapq), O((V + E) log V), sendo V os vértices e E as arestas.',
+        r: 'Com fila de prioridade binária (heapq), $O\\big((V + E)\\log V\\big)$, sendo $V$ os vértices e $E$ as arestas.',
       },
       {
         p: 'O que o Yen faz?',
@@ -111,7 +113,7 @@ export const CAPITULOS: Capitulo[] = [
     rotulo: 'Consumo',
     titulo: 'O consumo depende da velocidade',
     texto:
-      'O consumo em litros por 100 km é a + b/v + c·v². Em trânsito lento pesa o termo b/v, em velocidade alta pesa c·v², e a curva tem um mínimo no meio. Cada veículo do catálogo ajusta a curva a partir do consumo urbano e de estrada.',
+      'O consumo em litros por 100 km é $L(v) = a + \\dfrac{b}{v} + c\\,v^{2}$. Em trânsito lento pesa o termo $b/v$, em velocidade alta pesa $c\\,v^{2}$, e a curva tem um mínimo no meio. Cada veículo do catálogo ajusta a curva a partir do consumo urbano e de estrada.',
     perguntas: [
       {
         p: 'Por que a rota mais curta não é a que gasta menos?',
@@ -119,7 +121,7 @@ export const CAPITULOS: Capitulo[] = [
       },
       {
         p: 'Qual a velocidade de menor consumo?',
-        r: 'É v = (b / 2c)^(1/3). Na curva padrão do projeto (a = 3,04; b = 150; c = 2,73·10⁻⁴) dá cerca de 65 km/h, com cerca de 6,5 L/100 km.',
+        r: 'É $v^{*} = \\left(\\dfrac{b}{2c}\\right)^{1/3}$. Na curva padrão do projeto ($a = 3{,}04$; $b = 150$; $c = 2{,}73\\cdot 10^{-4}$) dá cerca de 65 km/h, com cerca de 6,5 L/100 km.',
       },
       {
         p: 'De onde vêm os veículos?',
@@ -154,6 +156,30 @@ export const CAPITULOS: Capitulo[] = [
       {
         p: 'Posso confiar nos tempos?',
         r: 'Como demonstração, não: o trânsito é simulado. A distância vem do grafo real do OpenStreetMap, mas o tempo e o consumo dependem das velocidades usadas.',
+      },
+    ],
+  },
+  {
+    id: 'creditos',
+    rotulo: 'Créditos',
+    titulo: 'Quem fez este projeto',
+    texto: CREDITOS,
+    perguntas: [
+      {
+        p: 'Quem fez o quê?',
+        r: `${AUTOR} desenvolveu o projeto por completo: grafo, algoritmos, back-end, interface e cena 3D. ${COLABORADORES.join(', ')} colaboraram no sistema e ajudaram na validação dos dados e dos resultados. O professor responsável é ${PROFESSOR}.`,
+      },
+      {
+        p: 'Quem é o professor responsável?',
+        r: `${PERFIL_PROFESSOR} ${CONTEXTO}`,
+      },
+      {
+        p: 'De onde vêm os dados e o carro?',
+        r: 'As ruas vêm do OpenStreetMap (ODbL) e o mapa de fundo é da CARTO. Os veículos do catálogo vêm do Car3DB (MIT). O Toyota Corola 3D é de danieljorge435 (CC BY 4.0), via MeshFleet.',
+      },
+      {
+        p: 'Onde ficam o código e as decisões?',
+        r: 'Na página de construção, com a arquitetura, as decisões medidas, as fontes, as licenças e as perguntas de professor, do básico ao avançado.',
       },
     ],
   },

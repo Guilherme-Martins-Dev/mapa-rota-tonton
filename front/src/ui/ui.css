@@ -3,7 +3,7 @@
 .cartao h2 { margin: 0 0 var(--e2); font-size: var(--t2); line-height: 1.15; font-weight: 600; text-wrap: balance; }
 .cartao p { margin: 0; font-size: var(--t0); line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
 
-.metrica { display: inline-flex; flex-direction: column; gap: var(--e1); align-self: flex-start; padding: var(--e2) var(--e3); background: var(--superficie-2); border-radius: var(--e2); font-variant-numeric: tabular-nums; }
+.metrica { display: flex; flex-direction: column; justify-content: space-between; gap: var(--e1); min-width: 0; padding: var(--e2) var(--e3); background: var(--superficie-2); border-radius: var(--e2); font-variant-numeric: tabular-nums; }
 .metrica__valor { font-size: var(--t2); font-weight: 600; line-height: 1; }
 .metrica__rotulo { font-size: var(--t-1); color: var(--texto-suave); }
 .metrica[data-melhor='true'] .metrica__valor { color: var(--cor-criterio, var(--texto)); }
@@ -26,3 +26,10 @@
 [data-criterio='consumo'] { --cor-criterio: var(--c-consumo); }
 
 @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; } }
+
+/* Botão de destaque secundário: contorno no acento sobre véu, para não sumir sobre o mapa. */
+.botao--contorno { display: inline-flex; align-items: center; gap: var(--e2); background: var(--veu); color: var(--texto); box-shadow: inset 0 0 0 2px var(--acento); text-decoration: none; }
+.botao__seta { color: var(--acento); display: inline-block; animation: seta-pula 1.6s var(--ease) infinite; }
+@keyframes seta-pula { 50% { transform: translateY(4px); } }
+@media (hover: hover) and (pointer: fine) { .botao--contorno:hover { background: var(--acento); color: var(--sobre-cor); } .botao--contorno:hover .botao__seta { color: inherit; } }
+@media (prefers-reduced-motion: reduce) { .botao__seta { animation: none; } }

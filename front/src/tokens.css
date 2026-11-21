@@ -2,22 +2,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600&display=swap');
 
 :root {
-  /* cor: um fundo, uma tinta, três cores de critério com papel fixo */
-  --fundo: #0a0e14;
-  --superficie: #121821;
-  --superficie-2: #1a2230;
-  --texto: #e8edf3;
-  --texto-suave: #a5b0be;
-  --c-distancia: #4cc9f0;
-  --c-tempo: #ffbe3c;
-  --c-consumo: #7bd88f;
-  --c-alerta: #ff6b6b;
-  --sobre-cor: #0a0e14; /* texto sobre fundo de critério */
-  --veu: rgb(10 14 20 / 0.92);
+  /* 1. PRIMITIVOS: valores crus, sem papel. Só esta camada tem literais de cor e fonte. */
+  --p-ink-950: #0a0e14;
+  --p-ink-900: #121821;
+  --p-ink-800: #1a2230;
+  --p-ink-700: #2a3446;
+  --p-ink-100: #e8edf3;
+  --p-ink-400: #a5b0be;
+  --p-sky-400: #4cc9f0;
+  --p-amber-400: #ffbe3c;
+  --p-green-400: #7bd88f;
+  --p-red-400: #ff6b6b;
+  --p-fonte-sans: 'Instrument Sans', system-ui, sans-serif;
+  --p-fonte-mono: ui-monospace, 'Cascadia Code', Consolas, monospace; /* taste-skill-ignore: só para código literal (comandos e caminhos) */
+  --p-raio-1: 8px;
+  --p-raio-2: 12px;
+  --p-raio-pilula: 999px;
 
-  /* tipo: uma família, escala ~1.25 */
-  --fonte: 'Instrument Sans', system-ui, sans-serif;
-  --fonte-codigo: ui-monospace, 'Cascadia Code', Consolas, monospace; /* taste-skill-ignore: só para código literal (comandos e caminhos) */
+  /* 2. SEMÂNTICOS: o papel de cada valor. As telas usam esta camada. */
+  --fundo: var(--p-ink-950);
+  --superficie: var(--p-ink-900);
+  --superficie-2: var(--p-ink-800);
+  --linha: var(--p-ink-700);
+  --texto: var(--p-ink-100);
+  --texto-suave: var(--p-ink-400);
+  --c-distancia: var(--p-sky-400);
+  --c-tempo: var(--p-amber-400);
+  --c-consumo: var(--p-green-400);
+  --c-alerta: var(--p-red-400);
+  --acento: var(--c-tempo);
+  --foco: var(--c-distancia);
+  --sobre-cor: var(--p-ink-950); /* texto sobre fundo de critério */
+  --veu: rgb(10 14 20 / 0.92);
+  --fonte: var(--p-fonte-sans);
+  --fonte-codigo: var(--p-fonte-mono);
+  --raio: var(--p-raio-2);
+
+  /* tipo: escala ~1.25 */
   --t-1: 0.875rem;
   --t0: 1rem;
   --t1: 1.25rem;
@@ -33,7 +54,17 @@
   --e5: 32px;
   --e6: 48px;
   --e7: 64px;
-  --raio: 12px;
+
+  /* movimento */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --dur: 240ms;
+
+  /* 3. COMPONENTES: ajustes por peça, sempre apontando para um semântico. */
+  --painel-bg: var(--veu);
+  --painel-raio: var(--raio);
+  --botao-pilula-bg: var(--superficie-2);
+  --botao-pilula-ativo-bg: var(--acento);
+  --botao-pilula-ativo-texto: var(--sobre-cor);
+  --alvo-toque: 44px;
+  --leitura: 46rem;
 }
