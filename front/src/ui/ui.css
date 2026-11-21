@@ -26,3 +26,10 @@
 [data-criterio='consumo'] { --cor-criterio: var(--c-consumo); }
 
 @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; } }
+
+/* Botão de destaque secundário: contorno no acento sobre véu, para não sumir sobre o mapa. */
+.botao--contorno { display: inline-flex; align-items: center; gap: var(--e2); background: var(--veu); color: var(--texto); box-shadow: inset 0 0 0 2px var(--acento); text-decoration: none; }
+.botao__seta { color: var(--acento); display: inline-block; animation: seta-pula 1.6s var(--ease) infinite; }
+@keyframes seta-pula { 50% { transform: translateY(4px); } }
+@media (hover: hover) and (pointer: fine) { .botao--contorno:hover { background: var(--acento); color: var(--sobre-cor); } .botao--contorno:hover .botao__seta { color: inherit; } }
+@media (prefers-reduced-motion: reduce) { .botao__seta { animation: none; } }

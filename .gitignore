@@ -23,3 +23,11 @@ front/dist/
 
 # fontes 3D baixadas (MeshFleet/Sketchfab): só o .glb convertido vai para public/models
 front/fontes-3d/
+
+# vídeo comercial: só roteiro e scripts versionados
+video/audio/
+video/captura/
+video/saida/
+video/scratch/
+video/node_modules/
+video/*.log

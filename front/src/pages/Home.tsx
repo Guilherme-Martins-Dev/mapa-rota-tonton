@@ -59,7 +59,7 @@ export default function Home() {
         </div>
         <div className="acoes entra">
           <Link to="/mapa" className="botao">Explorar o mapa</Link>
-          <a href="#viagem" className="link">Ver como funciona</a>
+          <a href="#viagem" className="botao botao--contorno">Ver como funciona <span className="botao__seta" aria-hidden="true">↓</span></a>
         </div>
       </section>
 

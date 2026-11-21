@@ -3,6 +3,8 @@ import {
   COMANDOS, DECISOES, ETAPAS, FONTES, FRONT_TECNICAS, INDICE, LIMITES, NIVEIS, NUMEROS, PERGUNTAS, PILHA, REFERENCIAS,
   type Nivel,
 } from '../conteudo/construcao'
+import { AUTORIA, CONTEXTO, PERFIL_PROFESSOR } from '../conteudo/equipe'
+import { Tx } from '../ui/Tx'
 import './construcao.css'
 
 /** Só no desktop, onde o índice e a resposta ficam fixos: ali a leitura acompanha a rolagem. */
@@ -63,6 +65,7 @@ export default function Construcao() {
             O sistema escolhe rotas em Messejana, Fortaleza, por distância, tempo ou consumo de combustível. O site mostra, passo a passo, como
             ele decide. Aqui estão o caminho, as fontes, as licenças e as respostas para perguntas do básico ao avançado.
           </p>
+          <p className="constr__lead">{AUTORIA} {PERFIL_PROFESSOR} {CONTEXTO}</p>
           <dl className="constr__numeros">
             {NUMEROS.map((n) => (
               <div key={n.rotulo}>
@@ -110,7 +113,7 @@ export default function Construcao() {
             {FRONT_TECNICAS.map((t) => (
               <div key={t.titulo}>
                 <dt>{t.titulo}</dt>
-                <dd>{t.texto}</dd>
+                <dd><Tx>{t.texto}</Tx></dd>
               </div>
             ))}
           </dl>
@@ -161,18 +164,18 @@ export default function Construcao() {
               {lista.map((q, i) => (
                 <li key={q.p} data-i={i}>
                   <button type="button" aria-expanded={i === sel} onClick={() => setSel(i)}>
-                    <span>{q.p}</span>
+                    <span><Tx>{q.p}</Tx></span>
                     {nivel === 'todos' && <small>{rotuloNivel(q.nivel)}</small>}
                   </button>
-                  {i === sel && <p className="constr__inline">{q.r}</p>}
+                  {i === sel && <p className="constr__inline"><Tx>{q.r}</Tx></p>}
                 </li>
               ))}
             </ul>
             {atual && (
               <div className="constr__resposta" aria-live="polite">
                 <small>{rotuloNivel(atual.nivel)}</small>
-                <h3>{atual.p}</h3>
-                <p>{atual.r}</p>
+                <h3><Tx>{atual.p}</Tx></h3>
+                <p><Tx>{atual.r}</Tx></p>
               </div>
             )}
           </div>

@@ -31,7 +31,8 @@ a.botao { display: inline-block; text-decoration: none; }
 .viagem { position: relative; z-index: 3; height: 100svh; overflow: clip; } /* transparente: o mapa fixo aparece até a rua surgir */
 .viagem__cena { position: absolute; inset: 0; opacity: 0; }
 .viagem--lista .viagem__cena { opacity: 1; background: var(--fundo); }
-.viagem--mergulho .viagem__painel, .viagem--mergulho .viagem__capitulos { opacity: 0; pointer-events: none; }
+/* Painel, índice e créditos só aparecem quando a rolagem começa a mover o carro (depois do mergulho e da descida da câmera). */
+.viagem--espera .viagem__painel, .viagem--espera .viagem__capitulos { opacity: 0; pointer-events: none; }
 .viagem__painel, .viagem__capitulos { transition: opacity var(--dur) var(--ease); }
 .viagem__painel { position: absolute; left: clamp(16px, 6vw, 80px); top: calc(var(--e7) + var(--e4)); width: min(32rem, calc(100vw - 32px)); max-height: calc(100svh - var(--e7) - var(--e4) - var(--e5)); overflow-y: auto; padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
 .capitulo { display: grid; gap: var(--e3); animation: entrar 260ms var(--ease) both; }
@@ -41,9 +42,13 @@ a.botao { display: inline-block; text-decoration: none; }
 .pergunta { display: grid; gap: var(--e2); margin-top: var(--e1); }
 .capitulo .pergunta__p { margin: 0; font-size: var(--t0); font-weight: 600; line-height: 1.35; color: var(--texto); text-wrap: balance; }
 .capitulo .pergunta__r { margin: 0; font-size: var(--t-1); line-height: 1.6; }
-.pergunta__proxima { justify-self: start; min-height: var(--alvo-toque); padding: 0 var(--e3); border: 0; border-radius: var(--p-raio-pilula); background: var(--botao-pilula-bg); color: var(--texto); font: inherit; font-size: var(--t-1); cursor: pointer; transition: background var(--dur) var(--ease); }
-.pergunta__proxima:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
-@media (hover: hover) and (pointer: fine) { .pergunta__proxima:hover { background: var(--botao-pilula-ativo-bg); color: var(--botao-pilula-ativo-texto); } }
+.pergunta__item { display: grid; gap: var(--e2); animation: pergunta-entra var(--dur) var(--ease); }
+.pergunta__passo { display: flex; align-items: center; gap: var(--e1); margin: 0; font-size: var(--t-1); color: var(--texto-suave); }
+.pergunta__ponto { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.35; transition: opacity var(--dur) var(--ease); }
+.pergunta__ponto--ativo { opacity: 1; background: var(--c-tempo); }
+.pergunta__contagem { margin-left: var(--e1); font-variant-numeric: tabular-nums; }
+@keyframes pergunta-entra { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .pergunta__item { animation: none; } }
 .capitulo .capitulo__leitura { color: var(--c-tempo); font-weight: 600; font-variant-numeric: tabular-nums; }
 .viagem__capitulos { position: absolute; right: clamp(12px, 3vw, 40px); top: 50%; transform: translateY(-50%); }
 .viagem__capitulos ol { display: grid; gap: var(--e1); margin: 0; padding: 0; list-style: none; }
@@ -58,7 +63,7 @@ a.botao { display: inline-block; text-decoration: none; }
 .viagem__lista { display: grid; gap: var(--e5); max-width: 42rem; margin: 0 auto; padding: var(--e6) var(--e4); }
 .viagem--lista .capitulo { padding: var(--e4); border-radius: var(--raio); background: var(--veu); animation: none; }
 .viagem__creditos { position: absolute; left: clamp(16px, 6vw, 80px); bottom: var(--e3); z-index: 2; max-width: 44rem; margin: 0; font-size: var(--t-1); line-height: 1.5; color: var(--texto-suave); padding: var(--e2) var(--e3); border-radius: var(--painel-raio); background: var(--painel-bg); }
-.viagem--mergulho .viagem__creditos { opacity: 0; }
+.viagem--espera .viagem__creditos { opacity: 0; pointer-events: none; }
 .viagem--lista .viagem__creditos { position: static; padding: var(--e4) clamp(16px, 6vw, 80px); }
 @media (max-width: 640px) {
   /* celular: o carro fica na metade de cima (CenaViagem desloca a câmera) e o texto numa folha embaixo */
@@ -109,3 +114,7 @@ a.botao { display: inline-block; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .texto, .painel, .capitulo { animation: none; }
 }
+
+.rodape { position: relative; z-index: 2; padding: var(--e5) clamp(16px, 6vw, 80px); background: var(--fundo); color: var(--texto-suave); font-size: var(--t-1); line-height: 1.6; }
+.rodape p { max-width: 60rem; margin: 0; }
+.rodape strong { color: var(--texto); font-weight: 600; }

@@ -1,6 +1,6 @@
 import { Environment, Lightformer, useGLTF } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import type { Group } from 'three'
 import { MathUtils } from 'three'
 import { CARRO_GLB as CARRO } from '../cena/modelos'
@@ -13,7 +13,9 @@ import { corToken } from '../cores'
 /** Carro: gira com o scroll. */
 function Carro() {
   const ref = useRef<Group>(null)
-  const { scene } = useGLTF(CARRO)
+  // Cópia própria: o hero muda posição, escala e giro do objeto, e o `useGLTF` entrega o MESMO objeto à cena da viagem.
+  const original = useGLTF(CARRO).scene
+  const scene = useMemo(() => original.clone(true), [original])
   useFrame((_, dt) => {
     const g = ref.current
     if (!g) return

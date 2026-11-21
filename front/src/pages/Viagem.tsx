@@ -8,6 +8,7 @@ import { INTRO_VIAGEM, MERGULHO, viagem } from '../cena/progresso'
 import { CAPITULOS, type Capitulo } from '../conteudo/capitulos'
 import { rotaDoCriterio, type Rotas } from '../data/tipos'
 import { CRITERIOS, Metrica } from '../ui'
+import { Tx } from '../ui/Tx'
 
 const CenaViagem = lazy(() => import('../cena/CenaViagem').then((m) => ({ default: m.CenaViagem })))
 
@@ -15,37 +16,48 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, useGSAP)
 
 const fmt = (n: number, casas: number) => n.toFixed(casas).replace('.', ',')
 const N = CAPITULOS.length
-/** Rolagem total da viagem, em alturas de tela: ~1,4 telas por capítulo, tempo de ler e abrir uma pergunta. */
-const ALTURAS = 1100
+/** Rolagem total da viagem, em alturas de tela: ~2 telas por capítulo, uma pergunta a cada ~0,7 tela. */
+const ALTURAS = 1700
 
 /** Capítulo que cobre o progresso p (a descida inicial conta como o primeiro). */
 const capituloDe = (p: number) => Math.min(N - 1, Math.max(0, Math.floor(((p - INTRO_VIAGEM) / (1 - INTRO_VIAGEM)) * N)))
 /** Progresso em que o capítulo i começa (1% depois do limite, mais que o arredondamento do pct (±0,5%), para cair dentro dele). */
 const inicioDe = (i: number) => INTRO_VIAGEM + (i / N) * (1 - INTRO_VIAGEM) + 0.01
 
-/** Uma pergunta do professor por vez, com a resposta já visível; o botão passa para a próxima. */
-function Pergunta({ c }: { c: Capitulo }) {
-  const [i, setI] = useState(0)
-  const q = c.perguntas[i]
+/** Posição (0..1) dentro do capítulo que cobre o progresso p. */
+const fracaoDe = (p: number) => {
+  const x = ((p - INTRO_VIAGEM) / (1 - INTRO_VIAGEM)) * N
+  return Math.min(0.999, Math.max(0, x - Math.floor(x)))
+}
+
+/** Perguntas do professor: no scroll aparece uma por vez, conforme a posição dentro do capítulo; sem scroll (lista) aparecem todas. */
+function Pergunta({ c, fracao, todas }: { c: Capitulo; fracao: number; todas?: boolean }) {
   const total = c.perguntas.length
+  const i = Math.min(total - 1, Math.floor(fracao * total))
+  const lista = todas ? c.perguntas : [c.perguntas[i]]
   return (
-    <div className="pergunta" role="group" aria-label="Pergunta do professor">
-      <h4 className="pergunta__p">{q.p}</h4>
-      <p className="pergunta__r">{q.r}</p>
-      {total > 1 && (
-        <button type="button" className="pergunta__proxima" onClick={() => setI((i + 1) % total)}>
-          Ver a pergunta {(i + 1) % total + 1} de {total}
-        </button>
+    <div className="pergunta" role="group" aria-label="Perguntas do professor">
+      {lista.map((q) => (
+        <div key={q.p} className="pergunta__item">
+          <h4 className="pergunta__p"><Tx>{q.p}</Tx></h4>
+          <p className="pergunta__r"><Tx>{q.r}</Tx></p>
+        </div>
+      ))}
+      {!todas && total > 1 && (
+        <p className="pergunta__passo" aria-hidden="true">
+          {c.perguntas.map((q, k) => <span key={q.p} className={k === i ? 'pergunta__ponto pergunta__ponto--ativo' : 'pergunta__ponto'} />)}
+          <span className="pergunta__contagem">{i + 1} de {total}</span>
+        </p>
       )}
     </div>
   )
 }
 
-function Painel({ c, rotas, leitura }: { c: Capitulo; rotas: Rotas | null; leitura?: string }) {
+function Painel({ c, rotas, leitura, fracao = 0, todas }: { c: Capitulo; rotas: Rotas | null; leitura?: string; fracao?: number; todas?: boolean }) {
   return (
     <article className="capitulo">
       <h3>{c.titulo}</h3>
-      <p>{c.texto}</p>
+      <p><Tx>{c.texto}</Tx></p>
       {c.metricas && (
         <div className="capitulo__metricas">
           {CRITERIOS.map((k) => {
@@ -62,7 +74,7 @@ function Painel({ c, rotas, leitura }: { c: Capitulo; rotas: Rotas | null; leitu
           })}
         </div>
       )}
-      <Pergunta c={c} />
+      <Pergunta c={c} fracao={fracao} todas={todas} />
       {c.acoes && (
         <div className="acoes">
           <Link to="/mapa" className="botao">Explorar o mapa</Link>
@@ -137,8 +149,8 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
     : undefined
 
   return (
-    <section id="viagem" ref={raiz} className={reduz ? 'viagem viagem--lista' : pct < MERGULHO * 100 + 1 ? 'viagem viagem--mergulho' : 'viagem'} aria-labelledby="viagem-titulo">
-      <h2 id="viagem-titulo" className="sr-only">A viagem pelo projeto, em sete capítulos</h2>
+    <section id="viagem" ref={raiz} className={reduz ? 'viagem viagem--lista' : pct < MERGULHO * 100 + 1 ? 'viagem viagem--mergulho viagem--espera' : pct < INTRO_VIAGEM * 100 ? 'viagem viagem--espera' : 'viagem'} aria-labelledby="viagem-titulo">
+      <h2 id="viagem-titulo" className="sr-only">A viagem pelo projeto, em {N} capítulos</h2>
       <div className="viagem__cena" aria-hidden="true">
         <Suspense fallback={null}>
           <CenaViagem rota={rota} />
@@ -147,13 +159,13 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
       {reduz ? (
         <div className="viagem__lista">
           {CAPITULOS.map((c) => (
-            <Painel key={c.id} c={c} rotas={rotas} />
+            <Painel key={c.id} c={c} rotas={rotas} todas />
           ))}
         </div>
       ) : (
         <>
           <div className="viagem__painel" aria-live="polite">
-            <Painel key={CAPITULOS[idx].id} c={CAPITULOS[idx]} rotas={rotas} leitura={leitura} />
+            <Painel key={CAPITULOS[idx].id} c={CAPITULOS[idx]} rotas={rotas} leitura={leitura} fracao={fracaoDe(pct / 100)} />
           </div>
           <nav className="viagem__capitulos" aria-label="Capítulos da viagem">
             <ol>

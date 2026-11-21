@@ -1,0 +1,41 @@
+{
+ "velocidade": 0.93,
+ "voz_base": "pm_alex",
+ "tau": 0.3,
+ "cenas": {
+  "c1_gancho": [
+   { "t": "Qual é o melhor caminho de um ponto a outro?", "l": "Qual é o melhor caminho de um ponto a outro?", "pausa": 0.5 },
+   { "t": "O mais curto? O mais rápido? Ou o que gasta menos combustível?", "l": "O mais curto? O mais rápido? Ou o que gasta menos combustível?", "pausa": 0.3 }
+  ],
+  "c2_apresenta": [
+   { "t": "Este é o Rotas de Messejana, em Fortaleza.", "l": "Este é o Rotas de Messejana, em Fortaleza.", "pausa": 0.5 },
+   { "t": "Um grafo feito com as ruas reais do Open Street Map escolhe a rota por você.", "l": "Um grafo feito com as ruas reais do OpenStreetMap escolhe a rota por você.", "pausa": 0.3 }
+  ],
+  "c3_grafo": [
+   { "t": "Ao rolar a página, o carro percorre o trajeto, e cada trecho explica uma etapa.", "l": "Ao rolar a página, o carro percorre o trajeto, e cada trecho explica uma etapa.", "pausa": 0.5 },
+   { "t": "Cada cruzamento vira um vértice. Cada rua, uma aresta com sentido.", "l": "Cada cruzamento vira um vértice. Cada rua, uma aresta com sentido.", "pausa": 0.3 }
+  ],
+  "c4_pesos": [
+   { "t": "Cada trecho recebe três pesos: distância, tempo e consumo.", "l": "Cada trecho recebe três pesos: distância, tempo e consumo.", "pausa": 0.5 },
+   { "t": "O Dêikstra, escrito à mão, acha o caminho de menor peso.", "l": "O Dijkstra, escrito à mão, acha o caminho de menor peso.", "pausa": 0.4 },
+   { "t": "O A estrela e o Iên completam a busca.", "l": "O A* e o Yen completam a busca.", "pausa": 0.3 }
+  ],
+  "c5_consumo": [
+   { "t": "O consumo muda com a velocidade, e o trânsito, simulado nesta demonstração, muda o resultado.", "l": "O consumo muda com a velocidade, e o trânsito, simulado nesta demonstração, muda o resultado.", "pausa": 0.5 },
+   { "t": "Por isso, três critérios podem gerar três rotas diferentes.", "l": "Por isso, três critérios podem gerar três rotas diferentes.", "pausa": 0.3 }
+  ],
+  "c6_mapa": [
+   { "t": "No mapa, você escolhe a origem, o destino e o veículo.", "l": "No mapa, você escolhe a origem, o destino e o veículo.", "pausa": 0.5 },
+   { "t": "E compara as três rotas lado a lado: quilômetros, minutos e litros.", "l": "E compara as três rotas lado a lado: quilômetros, minutos e litros.", "pausa": 0.3 }
+  ],
+  "c7_construcao": [
+   { "t": "A página de construção mostra as fontes, as licenças e as perguntas de professor, do básico ao avançado.", "l": "A página de construção mostra as fontes, as licenças e as perguntas de professor, do básico ao avançado.", "pausa": 0.3 }
+  ],
+  "c8_fecho": [
+   { "t": "Rotas de Messejana foi desenvolvido por completo por Guilherme Martins Bezerra.", "l": "Rotas de Messejana foi desenvolvido por completo por Guilherme Martins Bezerra.", "pausa": 0.5 },
+   { "t": "Com a colaboração de Erick Morais e Silva, Kauan Magalhães Costa e Luiz Henrique, na validação dos dados.", "l": "Com a colaboração de Erick Morais e Silva, Kauan Magalhães Costa e Luiz Henrique, na validação dos dados.", "pausa": 0.5 },
+   { "t": "Orientação do professor Sandro Costa Mesquita, coordenador da Pós em Inteligência Artificial e presidente do I T I A.", "l": "Orientação do professor Sandro Costa Mesquita, coordenador da Pós em Inteligência Artificial e presidente do ITIA.", "pausa": 0.5 },
+   { "t": "Disciplina Algoritmos em Grafos, Engenharia da Computação, Centro Universitário Ateneu, unidade Lagoa.", "l": "Disciplina Algoritmos em Grafos, Engenharia da Computação, Centro Universitário Ateneu, unidade Lagoa.", "pausa": 0.3 }
+  ]
+ }
+}
