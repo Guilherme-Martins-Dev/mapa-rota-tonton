@@ -1,5 +1,5 @@
 // Gera modelos em .glb com materiais PBR e texturas procedurais (cor, normal, emissiva).
-// Uso: npm run modelos   ->  public/models/{carro,predio}.glb
+// Uso: npm run modelos   ->  public/models/{carro,predio,torre,comercio,casa,medio}.glb
 // Para trocar por texturas fotográficas: substitua os PNG embutidos (gltf-transform) ou refine no Blender.
 import { Document, NodeIO } from '@gltf-transform/core'
 import { KHRMaterialsClearcoat } from '@gltf-transform/extensions'
@@ -117,6 +117,10 @@ async function salvar(arquivo, raiz) {
   for (const s of doc.getRoot().listScenes()) s.dispose()
   for (const n of doc.getRoot().listNodes()) n.dispose()
   for (const m of doc.getRoot().listMeshes()) m.dispose()
+  // materiais, texturas e acessores também: sem isso o próximo arquivo levaria as sobras do anterior
+  for (const m of doc.getRoot().listMaterials()) m.dispose()
+  for (const t of doc.getRoot().listTextures()) t.dispose()
+  for (const a of doc.getRoot().listAccessors()) a.dispose()
 }
 
 const q = (v, passos = 24) => Math.round(v * passos) / passos // quantiza: PNG comprime melhor
@@ -139,7 +143,7 @@ mkdirSync('public/models', { recursive: true })
     return [g, g, g, 255].map(Math.round)
   }))
 
-  const tinta = material('tinta', 0xffbe3c, 0.32, 0.65, { base: texPintura, normal: normPintura, normalEsc: 0.15, verniz: true })
+  const tinta = material('tinta', 0xffbe3c, 0.32, 0.3, { base: texPintura, normal: normPintura, normalEsc: 0.15, verniz: true })
   const vidro = material('vidro', 0x0f1722, 0.04, 0.1)
   const plastico = material('plastico', 0x14171c, 0.65, 0)
   const aro = material('aro', 0xc9d1da, 0.28, 1)
@@ -219,10 +223,9 @@ function fachada(baias, andares, semente) {
   }
 }
 
-{
-  const ANDARES = 8
-  const frente = fachada(4, ANDARES, 3)
-  const lado = fachada(3, ANDARES, 11)
+async function construirPredio(arquivo, { baias, andares, prof, semente, tom = 0xffffff, telhado = 0xffffff }) {
+  const frente = fachada(baias, andares, semente)
+  const lado = fachada(prof, andares, semente + 8)
   const concretoH = (x, y) => ruidoSuave(x / 5, y / 5, 21) * 0.6 + ruido(x, y, 22) * 0.4
   const texTelhado = tex('telhado', png(128, 128, (x, y) => {
     const g = q((120 + concretoH(x, y) * 60) / 255, 40) * 255
@@ -230,12 +233,13 @@ function fachada(baias, andares, semente) {
   }))
   const normTelhado = tex('telhado_n', mapaNormal(128, 128, concretoH, 1.5))
 
-  const mFrente = material('fachada_frente', 0xffffff, 0.55, 0, { base: frente.base, normal: frente.normal, emissiva: frente.emissiva })
-  const mLado = material('fachada_lado', 0xffffff, 0.55, 0, { base: lado.base, normal: lado.normal, emissiva: lado.emissiva })
-  const mTelhado = material('telhado', 0xffffff, 0.9, 0, { base: texTelhado, normal: normTelhado })
+  // `tom` e `telhado` multiplicam a textura: o mesmo desenho de fachada vira concreto, reboco ou vidro frio.
+  const mFrente = material('fachada_frente', tom, 0.55, 0, { base: frente.base, normal: frente.normal, emissiva: frente.emissiva })
+  const mLado = material('fachada_lado', tom, 0.55, 0, { base: lado.base, normal: lado.normal, emissiva: lado.emissiva })
+  const mTelhado = material('telhado', telhado, 0.9, 0, { base: texTelhado, normal: normTelhado })
   const mMetal = material('metal', 0x8a939e, 0.4, 0.85)
 
-  const W = 4.8, H = 9.6, D = 3.6
+  const W = baias * 1.2, H = andares * 1.2, D = prof * 1.2 // cada baia e cada andar têm 1,2 m (escala estilizada)
   const centro = [0, H / 2, 0]
   const gFrente = novaGeo(), gLado = novaGeo(), gTop = novaGeo(), gMetal = novaGeo()
   const uvF = [[0, 1], [1, 1], [1, 0], [0, 0]]
@@ -246,13 +250,20 @@ function fachada(baias, andares, semente) {
   face(gLado, [P(1, -1, 1), P(1, -1, -1), P(1, 1, -1), P(1, 1, 1)], uvF, centro)
   face(gLado, [P(-1, -1, -1), P(-1, -1, 1), P(-1, 1, 1), P(-1, 1, -1)], uvF, centro)
   caixa(gTop, [0, H + 0.12, 0], [W + 0.2, 0.24, D + 0.2], { uvPorMetro: 0.5 }) // laje de cobertura
-  caixa(gTop, [-1.4, H + 0.6, 0.6], [1.2, 0.72, 1.0], { uvPorMetro: 0.5 }) // casa de máquinas
-  caixa(gMetal, [1.2, H + 0.5, -0.7], [0.9, 0.5, 0.7]) // condensador
-  caixa(gMetal, [0.2, H + 0.42, 0.9], [0.5, 0.34, 0.5]) // exaustor
+  caixa(gTop, [-0.29 * W, H + 0.6, 0.17 * D], [0.25 * W, 0.72, 0.28 * D], { uvPorMetro: 0.5 }) // casa de máquinas
+  caixa(gMetal, [0.25 * W, H + 0.5, -0.2 * D], [0.19 * W, 0.5, 0.2 * D]) // condensador
+  caixa(gMetal, [0.04 * W, H + 0.42, 0.25 * D], [0.1 * W, 0.34, 0.14 * D]) // exaustor
 
-  const raiz = doc.createNode('predio')
+  const raiz = doc.createNode(arquivo)
   raiz.addChild(no('frente', gFrente, mFrente)).addChild(no('lados', gLado, mLado)).addChild(no('cobertura', gTop, mTelhado)).addChild(no('equipamentos', gMetal, mMetal))
-  await salvar('predio', raiz)
+  await salvar(arquivo, raiz)
 }
+
+// Cinco tipos para a cena da viagem: o bairro não é feito de um prédio só.
+await construirPredio('predio', { baias: 4, andares: 8, prof: 3, semente: 3 })
+await construirPredio('torre', { baias: 5, andares: 13, prof: 4, semente: 5, tom: 0xc9d6e8 })
+await construirPredio('comercio', { baias: 5, andares: 3, prof: 4, semente: 7, tom: 0xf0e2c8 })
+await construirPredio('casa', { baias: 3, andares: 2, prof: 3, semente: 9, tom: 0xe8c9a6, telhado: 0xb0603a })
+await construirPredio('medio', { baias: 4, andares: 5, prof: 3, semente: 13, tom: 0xbac4b2 })
 
 console.log('modelos gerados em public/models')
