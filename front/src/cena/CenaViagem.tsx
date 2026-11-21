@@ -5,13 +5,14 @@ import { BufferGeometry, Float32BufferAttribute, MathUtils, type Group, type Obj
 import { corToken } from '../cores'
 import type { RotaFeature } from '../data/tipos'
 import { Caminho, criarCaminho, distribuirPredios, type Predio, type TipoPredio } from './caminho'
-import { viagem } from './progresso'
+import { INTRO_VIAGEM, viagem } from './progresso'
 
 const MEIA_PISTA = 2.2
 const CALCADA = 3.6
 const ALTURA_CAMERA = 2.3
 const ATRAS_CAMERA = 5.4
 const MAX_CAMERA = 16
+const ALTURA_AEREA = 36
 
 /** Faixa de largura variável ao longo de [s0, s1], entre os recuos o1 e o2 da linha central, no nível y. */
 function fita(rua: Caminho, o1: number, o2: number, y: number, s0 = 0, s1 = rua.comprimento): BufferGeometry {
@@ -102,7 +103,9 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
 
   useFrame((state, dt) => {
     const delta = Math.min(dt, 0.1) // aba em segundo plano: não deixa o carro "saltar"
-    const alvo = MathUtils.clamp(viagem.valor, 0, 1) * rua.comprimento
+    const prog = MathUtils.clamp(viagem.valor, 0, 1)
+    const alvo = MathUtils.clamp((prog - INTRO_VIAGEM) / (1 - INTRO_VIAGEM), 0, 1) * rua.comprimento // o carro só anda depois da descida
+    const descida = MathUtils.smoothstep(prog, 0, INTRO_VIAGEM) // 0 = vista aérea da largada, 1 = câmera de perseguição
     sRef.current = damp(sRef.current, alvo, 3.5, delta)
     const s = sRef.current
     const c = rua.em(s)
@@ -126,16 +129,18 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     // Tela em pé (celular): o campo de visão horizontal encolhe, então a câmera recua e sobe para o carro caber.
     const recuo = Math.min(2.2, Math.max(1, 1.5 / (state.size.width / state.size.height)))
     const k = 1 - Math.exp(-6 * delta)
-    cam.position.x += (c.x - tx * ATRAS_CAMERA * recuo - tz * 1.1 - cam.position.x) * k
-    cam.position.y += (ALTURA_CAMERA * (0.6 + 0.4 * recuo) - cam.position.y) * k
-    cam.position.z += (c.z - tz * ATRAS_CAMERA * recuo + tx * 1.1 - cam.position.z) * k
+    const atras = ATRAS_CAMERA * recuo * descida + 3 * (1 - descida)
+    const alto = ALTURA_CAMERA * (0.6 + 0.4 * recuo) * descida + ALTURA_AEREA * (1 - descida)
+    cam.position.x += (c.x - tx * atras - tz * 1.1 * descida - cam.position.x) * k
+    cam.position.y += (alto - cam.position.y) * k
+    cam.position.z += (c.z - tz * atras + tx * 1.1 * descida - cam.position.z) * k
     // Salto de scroll (barra arrastada, âncora): a câmera não fica mais longe do que MAX_CAMERA do carro.
     const dx = cam.position.x - c.x, dz = cam.position.z - c.z, dist = Math.hypot(dx, dz)
     if (dist > MAX_CAMERA) {
       cam.position.x = c.x + (dx / dist) * MAX_CAMERA
       cam.position.z = c.z + (dz / dist) * MAX_CAMERA
     }
-    cam.lookAt(c.x + tx * 6, 0.7, c.z + tz * 6)
+    cam.lookAt(c.x + tx * 6 * descida, 0.7 * descida, c.z + tz * 6 * descida)
     luz.current?.position.set(cam.position.x, cam.position.y + 2.5, cam.position.z) // preenchimento: acende o que a câmera vê
   })
 
@@ -153,10 +158,10 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
   )
 }
 
-/** Câmera já atrás do carro na largada (e não dentro dele, esperando o amortecimento recuá-la). */
+/** Câmera inicial: vista aérea sobre a largada (a descida até a perseguição é guiada pelo scroll). */
 function posicaoInicial(rua: Caminho): [number, number, number] {
   const c = rua.em(0)
-  return [c.x - c.tx * ATRAS_CAMERA - c.tz * 1.1, ALTURA_CAMERA, c.z - c.tz * ATRAS_CAMERA + c.tx * 1.1]
+  return [c.x - c.tx * 3, ALTURA_AEREA, c.z - c.tz * 3] // a viagem começa de cima e desce até o carro
 }
 
 export function CenaViagem({ rota }: { rota: RotaFeature | undefined }) {
