@@ -23,6 +23,25 @@ const capituloDe = (p: number) => Math.min(N - 1, Math.max(0, Math.floor(((p - I
 /** Progresso em que o capítulo i começa (1% depois do limite, mais que o arredondamento do pct (±0,5%), para cair dentro dele). */
 const inicioDe = (i: number) => INTRO_VIAGEM + (i / N) * (1 - INTRO_VIAGEM) + 0.01
 
+/** Uma pergunta do professor por vez, com a resposta já visível; o botão passa para a próxima. */
+function Pergunta({ c }: { c: Capitulo }) {
+  const [i, setI] = useState(0)
+  const q = c.perguntas[i]
+  const total = c.perguntas.length
+  return (
+    <div className="pergunta" role="group" aria-label="Pergunta do professor">
+      <p className="pergunta__marca">Pergunta do professor{total > 1 ? ` ${i + 1} de ${total}` : ''}</p>
+      <p className="pergunta__p">{q.p}</p>
+      <p className="pergunta__r">{q.r}</p>
+      {total > 1 && (
+        <button type="button" className="pergunta__proxima" onClick={() => setI((i + 1) % total)}>
+          {i + 1 < total ? 'Próxima pergunta' : 'Voltar à primeira'}
+        </button>
+      )}
+    </div>
+  )
+}
+
 function Painel({ c, rotas, leitura }: { c: Capitulo; rotas: Rotas | null; leitura?: string }) {
   return (
     <article className="capitulo">
@@ -44,14 +63,7 @@ function Painel({ c, rotas, leitura }: { c: Capitulo; rotas: Rotas | null; leitu
           })}
         </div>
       )}
-      <div className="capitulo__perguntas">
-        {c.perguntas.map((q) => (
-          <details key={q.p}>
-            <summary>{q.p}</summary>
-            <p>{q.r}</p>
-          </details>
-        ))}
-      </div>
+      <Pergunta c={c} />
       {c.acoes && (
         <div className="acoes">
           <Link to="/mapa" className="botao">Explorar o mapa</Link>
@@ -83,7 +95,7 @@ function mergulhar(prog: number) {
     carro.style.transform = `translate3d(${dx * d}px, ${dy * d}px, 0) scale(${1 - 0.5 * d})`
     carro.style.opacity = String(1 - sai)
   }
-  if (rua) rua.style.opacity = String(Math.min(1, Math.max(0, (d - 0.45) / 0.55)))
+  if (rua) rua.style.opacity = String(Math.min(1, Math.max(0, (d - 0.75) / 0.25)))
 }
 
 export function Viagem({ rotas }: { rotas: Rotas | null }) {

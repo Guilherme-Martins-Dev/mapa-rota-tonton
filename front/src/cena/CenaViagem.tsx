@@ -164,6 +164,10 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
       cam.position.z = c.z + (dz / dist) * MAX_CAMERA
     }
     cam.lookAt(c.x + tx * 6 * descida, 0.7 * descida, c.z + tz * 6 * descida)
+    // Composição: o painel de texto ocupa a esquerda (desktop) ou a metade de baixo (celular); o carro fica no resto.
+    const { width: W, height: H } = state.size
+    const retrato = W / H < 0.9
+    cam.setViewOffset(W, H, retrato ? 0 : -W * 0.14, retrato ? H * 0.22 : 0, W, H)
     luz.current?.position.set(cam.position.x, cam.position.y + 2.5, cam.position.z) // preenchimento: acende o que a câmera vê
   })
 

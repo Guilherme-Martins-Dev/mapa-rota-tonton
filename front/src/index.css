@@ -14,7 +14,8 @@ body { margin: 0; background: var(--fundo); color: var(--texto); font-size: var(
 /* barra simples: marca, dois links */
 .barra { position: fixed; inset: 0 0 auto 0; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: var(--e3) clamp(16px, 6vw, 80px); background: var(--veu); }
 .barra a { color: var(--texto); text-decoration: none; font-size: var(--t-1); }
-.barra .marca { font-weight: 600; font-size: var(--t0); }
+.barra .marca { font-weight: 600; font-size: var(--t0); white-space: nowrap; }
+@media (max-width: 640px) { .barra { padding-inline: var(--e3); } .barra nav { gap: var(--e3); } }
 .barra nav { display: flex; gap: var(--e4); }
 .barra nav a { color: var(--texto-suave); }
 .barra nav a.active { color: var(--texto); font-weight: 600; }
@@ -32,16 +33,18 @@ a.botao { display: inline-block; text-decoration: none; }
 .viagem--lista .viagem__cena { opacity: 1; background: var(--fundo); }
 .viagem--mergulho .viagem__painel, .viagem--mergulho .viagem__capitulos { opacity: 0; pointer-events: none; }
 .viagem__painel, .viagem__capitulos { transition: opacity var(--dur) var(--ease); }
-.viagem__painel { position: absolute; left: clamp(16px, 6vw, 80px); top: calc(var(--e7) + var(--e4)); width: min(30rem, calc(100vw - 32px)); max-height: calc(100svh - var(--e7) - var(--e4) - var(--e5)); overflow-y: auto; padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
+.viagem__painel { position: absolute; left: clamp(16px, 6vw, 80px); top: calc(var(--e7) + var(--e4)); width: min(32rem, calc(100vw - 32px)); max-height: calc(100svh - var(--e7) - var(--e4) - var(--e5)); overflow-y: auto; padding: var(--e4); background: var(--veu); border-radius: var(--raio); }
 .capitulo { display: grid; gap: var(--e3); animation: entrar 260ms var(--ease) both; }
 .capitulo h3 { margin: 0; font-size: var(--t2); font-weight: 600; text-wrap: balance; }
 .capitulo p { margin: 0; line-height: 1.6; color: var(--texto-suave); text-wrap: pretty; }
 .capitulo__metricas { display: flex; flex-wrap: wrap; gap: var(--e2); }
-.capitulo__perguntas { display: grid; gap: var(--e1); }
-.capitulo__perguntas details { padding: var(--e2) var(--e3); border-radius: 8px; background: var(--superficie); }
-.capitulo__perguntas summary { min-height: 24px; color: var(--texto); font-weight: 500; cursor: pointer; }
-.capitulo__perguntas summary:focus-visible { outline: 2px solid var(--c-distancia); outline-offset: 2px; }
-.capitulo__perguntas details p { margin-top: var(--e2); font-size: var(--t-1); }
+.pergunta { display: grid; gap: var(--e2); padding: var(--e3); border-radius: var(--raio); background: var(--superficie); border-left: 3px solid var(--c-tempo); }
+.capitulo .pergunta__marca { margin: 0; font-size: var(--t-1); font-weight: 600; color: var(--c-tempo); }
+.capitulo .pergunta__p { margin: 0; font-size: var(--t0); font-weight: 600; line-height: 1.35; color: var(--texto); text-wrap: balance; }
+.capitulo .pergunta__r { margin: 0; font-size: var(--t-1); line-height: 1.6; }
+.pergunta__proxima { justify-self: start; min-height: 44px; padding: 0 var(--e3); border: 0; border-radius: 999px; background: var(--superficie-2); color: var(--texto); font: inherit; font-size: var(--t-1); cursor: pointer; transition: background var(--dur) var(--ease); }
+.pergunta__proxima:focus-visible { outline: 2px solid var(--c-distancia); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .pergunta__proxima:hover { background: var(--fundo); } }
 .capitulo .capitulo__leitura { color: var(--c-tempo); font-weight: 600; font-variant-numeric: tabular-nums; }
 .viagem__capitulos { position: absolute; right: clamp(12px, 3vw, 40px); top: 50%; transform: translateY(-50%); }
 .viagem__capitulos ol { display: grid; gap: var(--e1); margin: 0; padding: 0; list-style: none; }
@@ -58,13 +61,15 @@ a.botao { display: inline-block; text-decoration: none; }
 .rodape { position: relative; z-index: 3; padding: var(--e6) clamp(16px, 6vw, 80px); background: var(--fundo); }
 .rodape p { max-width: 60ch; margin: 0; font-size: var(--t-1); line-height: 1.6; color: var(--texto-suave); }
 @media (max-width: 640px) {
-  .viagem__painel { left: var(--e3); right: var(--e3); top: calc(var(--e7) + var(--e2)); width: auto; max-height: 52svh; padding: var(--e3); }
-  .capitulo__metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .capitulo__metricas > * { flex: none; }
+  /* celular: o carro fica na metade de cima (CenaViagem desloca a câmera) e o texto numa folha embaixo */
+  .viagem__painel { left: var(--e3); right: var(--e3); top: auto; bottom: var(--e3); width: auto; max-height: 52svh; padding: var(--e3); }
   .capitulo { gap: var(--e2); }
   .capitulo h3 { font-size: var(--t1); }
   .capitulo p { font-size: var(--t-1); line-height: 1.5; }
-  .viagem__capitulos { top: auto; right: 0; bottom: var(--e3); left: 0; transform: none; }
+  .capitulo__metricas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .capitulo__metricas > * { flex: none; }
+  .pergunta { padding: var(--e2) var(--e3); }
+  .viagem__capitulos { top: calc(var(--e7) + var(--e2)); right: 0; left: 0; transform: none; }
   .viagem__capitulos ol { display: flex; justify-content: center; gap: var(--e1); }
   .viagem__capitulos button { padding: 0; width: 44px; justify-content: center; }
   .viagem__nome { display: none; }

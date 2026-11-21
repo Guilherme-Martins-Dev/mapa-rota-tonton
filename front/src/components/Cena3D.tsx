@@ -9,9 +9,8 @@ import { usePausa, reduzMovimento } from '../cena/pausa'
 import { MERGULHO, progresso, viagem } from '../cena/progresso'
 import { corToken } from '../cores'
 
-const PREDIO = '/models/predio.glb'
 
-/** Carro: gira com o scroll e se afasta para dar lugar ao prédio na segunda metade. */
+/** Carro: gira com o scroll. */
 function Carro() {
   const ref = useRef<Group>(null)
   const { scene } = useGLTF(CARRO)
@@ -20,22 +19,8 @@ function Carro() {
     if (!g) return
     const p = progresso.valor
     g.rotation.y = MathUtils.damp(g.rotation.y, -0.6 + p * Math.PI * 2, 4, dt)
-    g.position.x = MathUtils.damp(g.position.x, MathUtils.lerp(0, -2.4, MathUtils.smoothstep(p, 0.5, 0.8)), 4, dt)
   })
   return <primitive ref={ref} object={scene} scale={0.55} position={[0, -0.6, 0]} />
-}
-
-/** Prédio: entra pela direita conforme o scroll avança. */
-function Predio() {
-  const ref = useRef<Group>(null)
-  const { scene } = useGLTF(PREDIO)
-  useFrame((_, dt) => {
-    const g = ref.current
-    if (!g) return
-    const alvo = MathUtils.lerp(5, 1.6, MathUtils.smoothstep(progresso.valor, 0.4, 0.8))
-    g.position.x = MathUtils.damp(g.position.x, alvo, 4, dt)
-  })
-  return <primitive ref={ref} object={scene} scale={0.2} position={[5, -0.62, 0]} />
 }
 
 /** O carro do hero só aparece até o fim do mergulho; depois disso o canvas para. */
@@ -60,10 +45,8 @@ export function Cena3D() {
       <Pausa />
       <Chao />
       <Carro />
-      <Predio />
     </Canvas>
   )
 }
 
 useGLTF.preload(CARRO)
-useGLTF.preload(PREDIO)
