@@ -17,6 +17,7 @@
 
   /* tipo: uma família, escala ~1.25 */
   --fonte: 'Instrument Sans', system-ui, sans-serif;
+  --fonte-codigo: ui-monospace, 'Cascadia Code', Consolas, monospace; /* taste-skill-ignore: só para código literal (comandos e caminhos) */
   --t-1: 0.875rem;
   --t0: 1rem;
   --t1: 1.25rem;
