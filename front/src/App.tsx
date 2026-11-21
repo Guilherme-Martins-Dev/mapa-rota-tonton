@@ -2,6 +2,7 @@ import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import { progresso } from './cena/progresso'
 import { SECOES } from './conteudo/secoes'
 import { rotaDoCriterio, type Criterio } from './data/tipos'
 import { useRotas } from './data/useRotas'
@@ -23,6 +24,7 @@ export default function App() {
   useGSAP(
     () => {
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      ScrollTrigger.create({ trigger: raiz.current, start: 'top top', end: 'bottom bottom', onUpdate: (st) => (progresso.valor = st.progress) })
       gsap.utils.toArray<HTMLElement>('.secao').forEach((el) => {
         gsap.from(el.querySelector('.cartao'), {
           opacity: 0,
