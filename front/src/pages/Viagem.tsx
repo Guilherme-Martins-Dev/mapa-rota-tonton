@@ -30,12 +30,11 @@ function Pergunta({ c }: { c: Capitulo }) {
   const total = c.perguntas.length
   return (
     <div className="pergunta" role="group" aria-label="Pergunta do professor">
-      <p className="pergunta__marca">Pergunta do professor{total > 1 ? ` ${i + 1} de ${total}` : ''}</p>
-      <p className="pergunta__p">{q.p}</p>
+      <h4 className="pergunta__p">{q.p}</h4>
       <p className="pergunta__r">{q.r}</p>
       {total > 1 && (
         <button type="button" className="pergunta__proxima" onClick={() => setI((i + 1) % total)}>
-          {i + 1 < total ? 'Próxima pergunta' : 'Voltar à primeira'}
+          Outra pergunta ({i + 1}/{total})
         </button>
       )}
     </div>
@@ -170,6 +169,10 @@ export function Viagem({ rotas }: { rotas: Rotas | null }) {
           </nav>
         </>
       )}
+      <p className="viagem__creditos">
+        Ruas: OpenStreetMap (ODbL). Mapa: CARTO. Veículos: Car3DB (MIT). Carro "Toyota Corola" de danieljorge435, CC BY 4.0, via MeshFleet.
+        Trânsito simulado. <Link to="/construcao" className="link">Fontes e licenças</Link>
+      </p>
     </section>
   )
 }

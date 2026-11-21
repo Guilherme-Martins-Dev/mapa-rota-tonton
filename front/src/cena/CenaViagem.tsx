@@ -154,27 +154,27 @@ function Passeio({ rua, predios }: { rua: Caminho; predios: Predio[] }) {
     const k = 1 - Math.exp(-6 * delta)
     const atras = ATRAS_CAMERA * recuo * descida + 3 * (1 - descida)
     const alto = ALTURA_CAMERA * (0.6 + 0.4 * recuo) * descida + ALTURA_AEREA * (1 - descida)
-    cam.position.x += (c.x - tx * atras - tz * 2.3 * descida - cam.position.x) * k
+    cam.position.x += (c.x - tx * atras - tz * 3.4 * descida - cam.position.x) * k
     cam.position.y += (alto - cam.position.y) * k
-    cam.position.z += (c.z - tz * atras + tx * 2.3 * descida - cam.position.z) * k
+    cam.position.z += (c.z - tz * atras + tx * 3.4 * descida - cam.position.z) * k
     // Salto de scroll (barra arrastada, âncora): a câmera não fica mais longe do que MAX_CAMERA do carro.
     const dx = cam.position.x - c.x, dz = cam.position.z - c.z, dist = Math.hypot(dx, dz)
     if (dist > MAX_CAMERA) {
       cam.position.x = c.x + (dx / dist) * MAX_CAMERA
       cam.position.z = c.z + (dz / dist) * MAX_CAMERA
     }
-    cam.lookAt(c.x + tx * 6 * descida, 0.7 * descida, c.z + tz * 6 * descida)
+    cam.lookAt(c.x + tx * 3.5 * descida, 0.3 * descida, c.z + tz * 3.5 * descida)
     // Composição: o painel de texto ocupa a esquerda (desktop) ou a metade de baixo (celular); o carro fica no resto.
     const { width: W, height: H } = state.size
     const retrato = W / H < 0.9
-    cam.setViewOffset(W, H, retrato ? 0 : -W * 0.14, retrato ? H * 0.22 : 0, W, H)
+    cam.setViewOffset(W, H, retrato ? 0 : -W * 0.14, H * (retrato ? 0.2 : 0.1), W, H) // y positivo sobe a cena: as rodas ficam dentro do quadro
     luz.current?.position.set(cam.position.x, cam.position.y + 2.5, cam.position.z) // preenchimento: acende o que a câmera vê
   })
 
   return (
     <>
       <group ref={grupo} position={[inicio.x, 0, inicio.z]}>
-        <group ref={corpo}>
+        <group ref={corpo} position={[0, 0.03, 0]}>
           <Clone object={carro} scale={1} />
         </group>
         <ContactShadows position={[0, 0.02, 0]} opacity={0.6} scale={8} blur={2.2} far={1.5} resolution={256} />
