@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;600&family=JetBrains+Mono:wght@400&display=swap');
+
+:root {
+  --fundo: #0a0e14;
+  --superficie: #121821;
+  --borda: #ffffff1f;
+  --texto: #e8edf3;
+  --texto-suave: #97a3b3;
+  --c-distancia: #4cc9f0;
+  --c-tempo: #ffbe3c;
+  --c-consumo: #7bd88f;
+  --c-alerta: #ff6b6b;
+  --fonte: 'Inter Tight', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --raio: 12px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

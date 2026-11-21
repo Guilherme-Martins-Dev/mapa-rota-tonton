@@ -14,7 +14,7 @@ export function Mapa({ rotas }: { rotas: Rotas | null }) {
           id: 'rotas',
           data: rotas.features,
           getPath: (f) => f.geometry.coordinates as [number, number][],
-          getColor: [255, 190, 60],
+          getColor: [255, 190, 60] /* --c-tempo; por critério na Fase 4 */,
           getWidth: 6,
           widthUnits: 'meters',
         }),
