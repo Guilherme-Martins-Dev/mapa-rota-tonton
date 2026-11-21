@@ -1,9 +1,14 @@
 import { PathLayer } from '@deck.gl/layers'
 import DeckGL from '@deck.gl/react'
+import { setWorkerUrl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import { Map } from 'react-map-gl/maplibre'
 import { corCriterio } from '../cores'
 import type { Criterio, Rotas } from '../data/tipos'
+
+// O Vite não resolve o worker do MapLibre sozinho: aponta a URL do arquivo empacotado.
+setWorkerUrl(workerUrl)
 
 const MESSEJANA = { longitude: -38.4935, latitude: -3.8267, zoom: 13.5, pitch: 45 }
 const BASE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
