@@ -114,7 +114,3 @@ a.botao { display: inline-block; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .texto, .painel, .capitulo { animation: none; }
 }
-
-.rodape { position: relative; z-index: 2; padding: var(--e5) clamp(16px, 6vw, 80px); background: var(--fundo); color: var(--texto-suave); font-size: var(--t-1); line-height: 1.6; }
-.rodape p { max-width: 60rem; margin: 0; }
-.rodape strong { color: var(--texto); font-weight: 600; }

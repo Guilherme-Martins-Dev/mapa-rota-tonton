@@ -1,5 +1,4 @@
 import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
-import { AUTOR, COLABORADORES, CONTEXTO, PROFESSOR } from './conteudo/equipe'
 import Construcao from './pages/Construcao'
 import Explorar from './pages/Explorar'
 import Home from './pages/Home'
@@ -22,12 +21,6 @@ export default function App() {
         <Route path="/metodo" element={<Metodo />} />
         <Route path="/construcao" element={<Construcao />} />
       </Routes>
-      <footer className="rodape">
-        <p>
-          Desenvolvido por <strong>{AUTOR}</strong>. Colaboradores na validação dos dados: {COLABORADORES.join(', ')}.
-          Professor responsável: {PROFESSOR}. {CONTEXTO}
-        </p>
-      </footer>
     </BrowserRouter>
   )
 }
