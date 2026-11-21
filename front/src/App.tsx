@@ -1,30 +1,28 @@
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useEffect, useRef, useState } from 'react'
-import { Cena3D } from './components/Cena3D'
-import { Mapa } from './components/Mapa'
-import { carregarRotas, type Criterio, type Rotas } from './data/tipos'
+import { lazy, Suspense, useMemo, useRef, useState } from 'react'
+import { SECOES } from './conteudo/secoes'
+import { rotaDoCriterio, type Criterio } from './data/tipos'
+import { useRotas } from './data/useRotas'
 import { Cartao, Metrica, SeletorCriterio } from './ui'
+
+// Mapa (deck.gl + MapLibre) e cena 3D (three) são pesados: carregam sob demanda.
+const Mapa = lazy(() => import('./components/Mapa').then((m) => ({ default: m.Mapa })))
+const Cena3D = lazy(() => import('./components/Cena3D').then((m) => ({ default: m.Cena3D })))
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
-const SECOES = [
-  { id: 'grafo', titulo: 'As ruas viram um grafo', texto: 'Cruzamentos são vértices; trechos de rua são arestas.' },
-  { id: 'tempo', titulo: 'Tempo = comprimento / velocidade', texto: 'O trânsito da TomTom muda o peso de cada aresta.' },
-  { id: 'rotas', titulo: 'Três critérios, três rotas', texto: 'Distância, tempo e consumo escolhem caminhos diferentes.' },
-]
-
 export default function App() {
   const raiz = useRef<HTMLElement>(null)
-  const [rotas, setRotas] = useState<Rotas | null>(null)
+  const dados = useRotas()
+  const rotas = dados.estado === 'pronto' ? dados.rotas : null
   const [criterio, setCriterio] = useState<Criterio>('tempo')
-  useEffect(() => void carregarRotas().then(setRotas), [])
+  const rota = useMemo(() => rotaDoCriterio(rotas, criterio), [rotas, criterio])
 
   useGSAP(
     () => {
-      const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      if (reduzir) return
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
       gsap.utils.toArray<HTMLElement>('.secao').forEach((el) => {
         gsap.from(el.querySelector('.cartao'), {
           opacity: 0,
@@ -38,19 +36,30 @@ export default function App() {
 
   return (
     <main ref={raiz}>
-      <div className="fundo">
-        <Mapa rotas={rotas} criterio={criterio} />
-      </div>
-      <div className="cena3d">
-        <Cena3D />
-      </div>
+      <Suspense fallback={null}>
+        <div className="fundo">
+          <Mapa rotas={rotas} criterio={criterio} />
+        </div>
+        <div className="cena3d">
+          <Cena3D />
+        </div>
+      </Suspense>
       {SECOES.map((s) => (
         <section key={s.id} id={s.id} className="secao">
           <Cartao titulo={s.titulo}>{s.texto}</Cartao>
           {s.id === 'rotas' && (
             <>
               <SeletorCriterio valor={criterio} onChange={setCriterio} />
-              <Metrica valor="1,84" unidade="km" rotulo="distância" criterio={criterio} melhor />
+              {rota && (
+                <Metrica
+                  valor={rota.properties.distancia_km.toFixed(2).replace('.', ',')}
+                  unidade="km"
+                  rotulo={`${rota.properties.tempo_min.toFixed(1).replace('.', ',')} min, ${rota.properties.litros.toFixed(2).replace('.', ',')} L`}
+                  criterio={criterio}
+                  melhor
+                />
+              )}
+              {dados.estado === 'erro' && <p role="status">Não foi possível carregar as rotas.</p>}
             </>
           )}
         </section>
